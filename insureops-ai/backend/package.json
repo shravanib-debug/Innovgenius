@@ -1,0 +1,22 @@
+{
+  "name": "insureops-ai-backend",
+  "version": "1.0.0",
+  "description": "InsureOps AI — Express.js Backend for AI & Agent Observability Dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "helmet": "^8.0.0",
+    "morgan": "^1.10.0",
+    "pg": "^8.13.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.5",
+    "uuid": "^11.0.5",
+    "ws": "^8.18.0"
+  }
+}

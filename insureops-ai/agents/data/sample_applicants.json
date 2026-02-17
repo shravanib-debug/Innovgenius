@@ -1,0 +1,208 @@
+[
+    {
+        "id": "APP-001",
+        "name": "John Smith",
+        "age": 28,
+        "gender": "male",
+        "health_conditions": [],
+        "occupation": "software_engineer",
+        "occupation_risk_class": "low",
+        "coverage_amount": 250000,
+        "smoker": false,
+        "bmi": 23.5
+    },
+    {
+        "id": "APP-002",
+        "name": "Mary Johnson",
+        "age": 55,
+        "gender": "female",
+        "health_conditions": [
+            "diabetes_type2",
+            "hypertension"
+        ],
+        "occupation": "construction_worker",
+        "occupation_risk_class": "high",
+        "coverage_amount": 500000,
+        "smoker": false,
+        "bmi": 31.2
+    },
+    {
+        "id": "APP-003",
+        "name": "David Lee",
+        "age": 35,
+        "gender": "male",
+        "health_conditions": [
+            "asthma"
+        ],
+        "occupation": "teacher",
+        "occupation_risk_class": "low",
+        "coverage_amount": 300000,
+        "smoker": false,
+        "bmi": 25.0
+    },
+    {
+        "id": "APP-004",
+        "name": "Robert Chen",
+        "age": 62,
+        "gender": "male",
+        "health_conditions": [
+            "heart_disease",
+            "diabetes_type2",
+            "obesity"
+        ],
+        "occupation": "mining",
+        "occupation_risk_class": "very_high",
+        "coverage_amount": 750000,
+        "smoker": true,
+        "bmi": 38.5
+    },
+    {
+        "id": "APP-005",
+        "name": "Emily Davis",
+        "age": 24,
+        "gender": "female",
+        "health_conditions": [],
+        "occupation": "marketing_manager",
+        "occupation_risk_class": "low",
+        "coverage_amount": 150000,
+        "smoker": false,
+        "bmi": 21.8
+    },
+    {
+        "id": "APP-006",
+        "name": "Michael Brown",
+        "age": 45,
+        "gender": "male",
+        "health_conditions": [
+            "high_cholesterol"
+        ],
+        "occupation": "pilot",
+        "occupation_risk_class": "medium",
+        "coverage_amount": 1000000,
+        "smoker": false,
+        "bmi": 27.3
+    },
+    {
+        "id": "APP-007",
+        "name": "Sarah Wilson",
+        "age": 32,
+        "gender": "female",
+        "health_conditions": [],
+        "occupation": "nurse",
+        "occupation_risk_class": "low",
+        "coverage_amount": 200000,
+        "smoker": false,
+        "bmi": 22.1
+    },
+    {
+        "id": "APP-008",
+        "name": "James Taylor",
+        "age": 48,
+        "gender": "male",
+        "health_conditions": [
+            "mild_anxiety"
+        ],
+        "occupation": "accountant",
+        "occupation_risk_class": "low",
+        "coverage_amount": 400000,
+        "smoker": false,
+        "bmi": 26.5
+    },
+    {
+        "id": "APP-009",
+        "name": "William Harris",
+        "age": 58,
+        "gender": "male",
+        "health_conditions": [
+            "back_injury",
+            "hypertension"
+        ],
+        "occupation": "firefighter",
+        "occupation_risk_class": "very_high",
+        "coverage_amount": 600000,
+        "smoker": false,
+        "bmi": 29.8
+    },
+    {
+        "id": "APP-010",
+        "name": "Lisa Anderson",
+        "age": 30,
+        "gender": "female",
+        "health_conditions": [],
+        "occupation": "graphic_designer",
+        "occupation_risk_class": "low",
+        "coverage_amount": 200000,
+        "smoker": false,
+        "bmi": 20.5
+    },
+    {
+        "id": "APP-011",
+        "name": "Thomas Moore",
+        "age": 50,
+        "gender": "male",
+        "health_conditions": [
+            "pre_diabetes"
+        ],
+        "occupation": "truck_driver",
+        "occupation_risk_class": "medium",
+        "coverage_amount": 450000,
+        "smoker": true,
+        "bmi": 32.0
+    },
+    {
+        "id": "APP-012",
+        "name": "Jessica Clark",
+        "age": 38,
+        "gender": "female",
+        "health_conditions": [
+            "allergies"
+        ],
+        "occupation": "lawyer",
+        "occupation_risk_class": "low",
+        "coverage_amount": 350000,
+        "smoker": false,
+        "bmi": 24.2
+    },
+    {
+        "id": "APP-013",
+        "name": "Daniel Martinez",
+        "age": 42,
+        "gender": "male",
+        "health_conditions": [
+            "sleep_apnea"
+        ],
+        "occupation": "electrician",
+        "occupation_risk_class": "medium",
+        "coverage_amount": 300000,
+        "smoker": false,
+        "bmi": 30.1
+    },
+    {
+        "id": "APP-014",
+        "name": "Amanda White",
+        "age": 26,
+        "gender": "female",
+        "health_conditions": [],
+        "occupation": "data_scientist",
+        "occupation_risk_class": "low",
+        "coverage_amount": 175000,
+        "smoker": false,
+        "bmi": 22.7
+    },
+    {
+        "id": "APP-015",
+        "name": "George Thompson",
+        "age": 67,
+        "gender": "male",
+        "health_conditions": [
+            "arthritis",
+            "hypertension",
+            "high_cholesterol"
+        ],
+        "occupation": "retired",
+        "occupation_risk_class": "low",
+        "coverage_amount": 100000,
+        "smoker": false,
+        "bmi": 28.4
+    }
+]

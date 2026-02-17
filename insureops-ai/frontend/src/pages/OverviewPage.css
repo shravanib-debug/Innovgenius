@@ -1,0 +1,276 @@
+/* ─── Overview Page ───────────────────────────── */
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-base);
+}
+
+.last-updated {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* ─── KPI Cards Override ─────────────────────── */
+.kpi-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-md);
+}
+
+.kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kpi-icon-blue {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--color-accent-blue);
+}
+
+.kpi-icon-teal {
+    background: rgba(20, 184, 166, 0.15);
+    color: var(--color-accent-teal);
+}
+
+.kpi-icon-orange {
+    background: rgba(249, 115, 22, 0.15);
+    color: var(--color-accent-orange);
+}
+
+.kpi-icon-red {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--color-error);
+}
+
+.kpi-icon-green {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--color-success);
+}
+
+/* ─── Section Headers ────────────────────────── */
+.section-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.section-header h2 {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.section-header p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* ─── Agent Grid ─────────────────────────────── */
+.agent-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-base);
+    margin-bottom: var(--spacing-xl);
+}
+
+.agent-card {
+    padding: var(--spacing-lg);
+}
+
+.agent-card-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.agent-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.agent-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.agent-icon-healthy {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}
+
+.agent-icon-warning {
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+}
+
+.agent-info h3 {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 4px;
+}
+
+.agent-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-sm);
+}
+
+.agent-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.agent-metric-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.agent-metric-value {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+/* ─── Recent Traces List ─────────────────────── */
+.recent-traces-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.trace-row {
+    display: grid;
+    grid-template-columns: 70px 100px 90px 60px 70px 1fr;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) 0;
+    border-bottom: 1px solid var(--color-border-light);
+    font-size: var(--font-size-sm);
+}
+
+.trace-row:last-child {
+    border-bottom: none;
+}
+
+.trace-id {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    color: var(--color-text-accent);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+}
+
+.trace-agent {
+    color: var(--color-text-primary);
+    font-weight: 500;
+}
+
+.trace-latency,
+.trace-cost {
+    color: var(--color-text-secondary);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: var(--font-size-xs);
+}
+
+.trace-time {
+    color: var(--color-text-muted);
+    text-align: right;
+    font-size: var(--font-size-xs);
+}
+
+/* ─── Alerts List ────────────────────────────── */
+.alerts-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.alert-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-sm);
+    transition: background var(--transition-fast);
+}
+
+.alert-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.alert-warning {
+    border-left: 3px solid var(--color-warning);
+}
+
+.alert-critical {
+    border-left: 3px solid var(--color-error);
+}
+
+.alert-severity-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+}
+
+.alert-dot-warning {
+    background: var(--color-warning);
+}
+
+.alert-dot-critical {
+    background: var(--color-error);
+    animation: pulse 2s infinite;
+}
+
+.alert-content {
+    flex: 1;
+}
+
+.alert-name {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.alert-detail {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.alert-time {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 1200px) {
+    .agent-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .agent-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .trace-row {
+        grid-template-columns: 60px 80px 80px 50px 60px 1fr;
+    }
+}

@@ -1,0 +1,202 @@
+[
+    {
+        "id": "CLM-001",
+        "claim_type": "water_damage",
+        "description": "Burst pipe in the basement caused significant water damage to flooring, drywall, and stored personal items. The pipe burst during a cold snap when temperatures dropped below freezing. Homeowner noticed water pooling in the basement upon returning from work.",
+        "amount": 7500,
+        "policy_id": "POL-1001",
+        "claimant_id": "CUST-101",
+        "date_of_incident": "2026-02-10",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-002",
+        "claim_type": "fire_damage",
+        "description": "Kitchen fire caused by unattended stove spread to adjacent dining room. Significant damage to kitchen cabinets, appliances, countertops, dining room furniture, and smoke damage throughout first floor. Fire department responded within 10 minutes.",
+        "amount": 25000,
+        "policy_id": "POL-1002",
+        "claimant_id": "CUST-102",
+        "date_of_incident": "2026-02-08",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-003",
+        "claim_type": "flood_damage",
+        "description": "Heavy rainfall caused flash flooding in the neighborhood. Water entered through the ground floor, damaging hardwood floors, electrical systems, and lower wall sections. Basement completely submerged with 2 feet of standing water.",
+        "amount": 12000,
+        "policy_id": "POL-1003",
+        "claimant_id": "CUST-103",
+        "date_of_incident": "2026-02-05",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-004",
+        "claim_type": "auto_collision",
+        "description": "Rear-end collision at a traffic intersection. Other driver ran a red light and hit the insured vehicle from behind. Damage to rear bumper, trunk, tail lights, and rear quarter panel. Police report filed. No injuries.",
+        "amount": 4200,
+        "policy_id": "POL-1004",
+        "claimant_id": "CUST-104",
+        "date_of_incident": "2026-02-12",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-005",
+        "claim_type": "theft",
+        "description": "Home burglary while family was on vacation. Stolen items include a 65-inch TV, laptop computer, jewelry box with gold necklaces and rings, gaming console, and designer handbag. Entry was forced through a back window. Alarm was not set.",
+        "amount": 8500,
+        "policy_id": "POL-1005",
+        "claimant_id": "CUST-105",
+        "date_of_incident": "2026-02-01",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-006",
+        "claim_type": "medical",
+        "description": "Emergency room visit after a slip and fall on icy sidewalk outside the insured property. Resulted in a fractured wrist requiring surgery and 6 weeks of physical therapy. Claim includes ER visit, surgery, follow-up appointments, and therapy.",
+        "amount": 15000,
+        "policy_id": "POL-1006",
+        "claimant_id": "CUST-106",
+        "date_of_incident": "2026-01-28",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-007",
+        "claim_type": "liability",
+        "description": "Visitor slipped on wet floor inside insured's home and sustained a back injury. Visitor is claiming medical expenses and lost wages. Incident occurred during a house party when a drink was spilled on tile flooring.",
+        "amount": 45000,
+        "policy_id": "POL-1007",
+        "claimant_id": "CUST-107",
+        "date_of_incident": "2026-01-25",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-008",
+        "claim_type": "windstorm",
+        "description": "Severe windstorm with 70mph gusts ripped shingles off the roof and uprooted a large oak tree that fell on the garage. Roof requires full replacement on the west side. Garage door and one vehicle inside damaged.",
+        "amount": 18000,
+        "policy_id": "POL-1008",
+        "claimant_id": "CUST-108",
+        "date_of_incident": "2026-02-14",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-009",
+        "claim_type": "auto_collision",
+        "description": "Single vehicle accident. Driver swerved to avoid a deer and hit a guardrail. Front bumper, hood, radiator, and right headlight assembly damaged. Vehicle towed to repair shop. No injuries to driver.",
+        "amount": 6800,
+        "policy_id": "POL-1009",
+        "claimant_id": "CUST-109",
+        "date_of_incident": "2026-02-11",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-010",
+        "claim_type": "fire_damage",
+        "description": "Electrical fire started in the garage, originating from faulty wiring in an older circuit breaker panel. Fire was contained to the garage but caused total loss of two vehicles, tools, and sports equipment stored inside.",
+        "amount": 52000,
+        "policy_id": "POL-1010",
+        "claimant_id": "CUST-110",
+        "date_of_incident": "2026-01-20",
+        "fraud_indicators": true
+    },
+    {
+        "id": "CLM-011",
+        "claim_type": "theft",
+        "description": "Car break-in at a shopping mall parking lot. Smashed driver side window. Stolen items: laptop bag with work laptop, tablet, wireless headphones, and a briefcase with important documents. Security camera footage unavailable due to maintenance.",
+        "amount": 3500,
+        "policy_id": "POL-1011",
+        "claimant_id": "CUST-111",
+        "date_of_incident": "2026-02-06",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-012",
+        "claim_type": "water_damage",
+        "description": "Washing machine supply hose burst on the second floor, causing water to flood the laundry room and seep through the floor to the first-floor ceiling below. Damage to ceilings, walls, carpet, and personal items in both rooms.",
+        "amount": 9200,
+        "policy_id": "POL-1012",
+        "claimant_id": "CUST-112",
+        "date_of_incident": "2026-02-09",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-013",
+        "claim_type": "auto_glass",
+        "description": "Rock kicked up by a truck on the highway struck the windshield, causing a crack that spread across the entire windshield. Full windshield replacement required. No other damage to the vehicle.",
+        "amount": 850,
+        "policy_id": "POL-1013",
+        "claimant_id": "CUST-113",
+        "date_of_incident": "2026-02-15",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-014",
+        "claim_type": "fire_damage",
+        "description": "Suspicious fire at a recently purchased property. Fire started in multiple locations simultaneously. Purchased high-value insurance just 45 days before incident. No occupants at time of fire. Neighbors report no signs of activity at the property for weeks.",
+        "amount": 48000,
+        "policy_id": "POL-1014",
+        "claimant_id": "CUST-114",
+        "date_of_incident": "2026-01-15",
+        "fraud_indicators": true
+    },
+    {
+        "id": "CLM-015",
+        "claim_type": "medical",
+        "description": "Routine dental procedure led to complications requiring emergency oral surgery. Claim includes initial procedure cost, emergency surgery, prescribed medications, and two weeks of follow-up care.",
+        "amount": 5600,
+        "policy_id": "POL-1015",
+        "claimant_id": "CUST-115",
+        "date_of_incident": "2026-02-03",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-016",
+        "claim_type": "auto_collision",
+        "description": "Three-vehicle chain collision on highway during heavy fog. Insured vehicle caught in the middle. Front and rear damage extensive. Air bags deployed. Two passengers treated for minor whiplash injuries at urgent care.",
+        "amount": 11500,
+        "policy_id": "POL-1016",
+        "claimant_id": "CUST-116",
+        "date_of_incident": "2026-02-07",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-017",
+        "claim_type": "theft",
+        "description": "Claimed theft of expensive jewelry collection from home safe. Claimant reports the safe was pried open while they were at work. No signs of forced entry to the home. Alarm system was deactivated. Fourth theft claim in two years from this claimant.",
+        "amount": 35000,
+        "policy_id": "POL-1017",
+        "claimant_id": "CUST-117",
+        "date_of_incident": "2026-01-30",
+        "fraud_indicators": true
+    },
+    {
+        "id": "CLM-018",
+        "claim_type": "structural",
+        "description": "Foundation crack discovered during home renovation. Crack extends across the full width of the basement foundation wall. Structural engineer assessment indicates the crack is due to settling and requires underpinning repair.",
+        "amount": 22000,
+        "policy_id": "POL-1018",
+        "claimant_id": "CUST-118",
+        "date_of_incident": "2026-01-22",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-019",
+        "claim_type": "water_damage",
+        "description": "Roof leak during extended rainfall. Water seeped through damaged flashing around the chimney, causing damage to attic insulation, second-floor ceiling, and interior walls. Mold discovered during inspection.",
+        "amount": 6500,
+        "policy_id": "POL-1019",
+        "claimant_id": "CUST-119",
+        "date_of_incident": "2026-02-13",
+        "fraud_indicators": false
+    },
+    {
+        "id": "CLM-020",
+        "claim_type": "auto_collision",
+        "description": "Parking lot fender bender. Other driver backed into insured vehicle while both were parked at a grocery store. Minor dent and paint scratch on the driver side door. Other driver admitted fault and provided insurance information.",
+        "amount": 1200,
+        "policy_id": "POL-1020",
+        "claimant_id": "CUST-120",
+        "date_of_incident": "2026-02-16",
+        "fraud_indicators": false
+    }
+]
