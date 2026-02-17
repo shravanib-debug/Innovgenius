@@ -3,8 +3,8 @@
 
 | Field | Detail |
 |---|---|
-| **Document Version** | 1.0 |
-| **Date** | February 16, 2026 |
+| **Document Version** | 1.1 |
+| **Date** | February 17, 2026 |
 | **Status** | Draft |
 | **Project Type** | Full-Stack AI Observability Platform |
 
@@ -266,14 +266,14 @@ The platform includes 3 real, working insurance AI agents (Claims Processing, Un
 | GET | `/api/metrics/overview` | Dashboard-level aggregated metrics |
 | GET | `/api/metrics/section1` | AI Application metrics (latency, cost, accuracy, drift) |
 | GET | `/api/metrics/section2` | LLM Agent metrics (approvals, escalations, tool usage) |
-| GET | `/api/metrics/agent/{agent_type}` | Metrics for a specific agent |
+| GET | `/api/metrics/agent/:agent_type` | Metrics for a specific agent |
 | GET | `/api/metrics/cost` | Cost breakdown and trends |
 
 #### Traces API
 | Method | Endpoint | Description |
 |---|---|---|
 | GET | `/api/traces` | List all traces (paginated, filterable) |
-| GET | `/api/traces/{trace_id}` | Full trace detail with all steps |
+| GET | `/api/traces/:trace_id` | Full trace detail with all steps |
 | POST | `/api/traces` | Ingest new trace (used by telemetry collector) |
 
 #### Agents API
@@ -290,7 +290,7 @@ The platform includes 3 real, working insurance AI agents (Claims Processing, Un
 | GET | `/api/alerts` | List all alerts (active + history) |
 | GET | `/api/alerts/active` | Currently active alerts only |
 | POST | `/api/alerts/rules` | Create a new alert rule |
-| PUT | `/api/alerts/{alert_id}/acknowledge` | Acknowledge an alert |
+| PUT | `/api/alerts/:alert_id/acknowledge` | Acknowledge an alert |
 
 ### 6.2 WebSocket Endpoints
 | Endpoint | Description |
@@ -442,9 +442,9 @@ CREATE TABLE alerts (
 | Dependency | Type | Notes |
 |---|---|---|
 | Google Gemini API or OpenAI API | External | LLM provider for agents — need API key |
-| Node.js v18+ | Runtime | Frontend build tooling |
-| Python 3.10+ | Runtime | Backend + agents |
-| PostgreSQL 15+ | Database | Can substitute with SQLite for simplified demo |
+| Node.js v18+ | Runtime | Backend (Express.js) + Frontend build tooling |
+| Python 3.10+ | Runtime | AI Agents (LangGraph) |
+| PostgreSQL 15+ | Database | Primary data store via Sequelize ORM |
 | FAISS | Library | Vector store for Claims Agent RAG |
 
 ---
@@ -474,4 +474,4 @@ CREATE TABLE alerts (
 
 ---
 
-*Document Version: 1.0 | Last Updated: February 16, 2026*
+*Document Version: 1.1 | Last Updated: February 17, 2026*

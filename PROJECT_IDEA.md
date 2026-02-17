@@ -62,7 +62,7 @@ The dashboard enables **real-time monitoring, insights, and actionable alerts** 
 └────────────────────────────┬────────────────────────────────────┘
                              │  REST API + WebSocket (real-time)
 ┌────────────────────────────▼────────────────────────────────────┐
-│                   FASTAPI BACKEND (Python)                        │
+│               EXPRESS.JS BACKEND (Node.js)                        │
 │                                                                   │
 │  ┌──────────────┐ ┌───────────────┐ ┌────────────┐ ┌──────────┐ │
 │  │  Telemetry   │ │  Alert        │ │  Analytics  │ │  REST    │ │
@@ -280,10 +280,11 @@ A detailed view into any single agent execution — the "debugger" for AI agents
 | **Frontend** | React + Vite | Fast, modern, most common in reference projects |
 | **UI Components** | ShadCN UI / Custom | Clean, professional look |
 | **Charts** | Recharts + custom D3.js | Flexible charting for complex visualizations |
-| **Backend** | FastAPI (Python) | Async-native, pairs perfectly with LangGraph |
-| **Agent Framework** | LangGraph | Best for tool-calling agents with built-in tracing |
+| **Backend** | Express.js (Node.js) | JavaScript full-stack consistency, fast async I/O, pairs well with React |
+| **ORM** | Sequelize | Mature PostgreSQL ORM for Node.js with migration support |
+| **Agent Framework** | LangGraph (Python) | Best for tool-calling agents with built-in tracing |
 | **LLM Provider** | Google Gemini API / OpenAI | Cost-effective, reliable |
-| **Real-time** | WebSocket (FastAPI) | Live dashboard updates |
+| **Real-time** | WebSocket (ws library) | Live dashboard updates via Node.js WebSocket server |
 | **Database** | PostgreSQL | Structured metrics, traces, alerts |
 | **Vector Store** | FAISS | For RAG in claims agent |
 | **PDF Processing** | PyMuPDF | Policy document parsing |
@@ -309,24 +310,24 @@ insureops-ai/
 │   │   └── App.jsx
 │   └── package.json
 │
-├── backend/                     # FastAPI Backend
-│   ├── app/
-│   │   ├── api/                 # REST API routes
-│   │   │   ├── metrics.py       # Metrics endpoints
-│   │   │   ├── traces.py        # Trace endpoints
-│   │   │   ├── alerts.py        # Alert endpoints
-│   │   │   └── agents.py        # Agent trigger endpoints
+├── backend/                     # Express.js (Node.js) Backend
+│   ├── src/
+│   │   ├── routes/              # Express route handlers
+│   │   │   ├── metrics.js       # Metrics endpoints
+│   │   │   ├── traces.js        # Trace endpoints
+│   │   │   ├── alerts.js        # Alert endpoints
+│   │   │   └── agents.js        # Agent trigger endpoints
 │   │   ├── core/                # Core business logic
-│   │   │   ├── telemetry.py     # Telemetry collector
-│   │   │   ├── alert_engine.py  # Alert evaluation logic
-│   │   │   └── analytics.py     # Aggregation & insights
-│   │   ├── models/              # Database models
+│   │   │   ├── alertEngine.js   # Alert evaluation logic
+│   │   │   └── analytics.js     # Aggregation & insights
+│   │   ├── models/              # Sequelize database models
+│   │   ├── config/              # App config & DB connection
 │   │   ├── services/            # Business logic services
-│   │   └── websocket.py         # WebSocket manager
-│   ├── requirements.txt
-│   └── main.py
+│   │   └── websocket.js         # WebSocket manager (ws)
+│   ├── package.json
+│   └── server.js
 │
-├── agents/                      # Insurance AI Agents
+├── agents/                      # Insurance AI Agents (Python)
 │   ├── claims_agent/            # Claims processing agent
 │   │   ├── agent.py
 │   │   ├── tools.py
@@ -369,7 +370,7 @@ insureops-ai/
 
 | Phase | Duration | Deliverables |
 |---|---|---|
-| **Phase 1: Foundation** | Day 1 | Project scaffolding, DB schema, backend API skeleton, frontend setup |
+| **Phase 1: Foundation** | Day 1 | Project scaffolding, DB schema, Express.js backend skeleton, React frontend setup |
 | **Phase 2: Agents** | Day 2-3 | 3 working agents (Claims, Underwriting, Fraud) with LangGraph |
 | **Phase 3: Telemetry** | Day 3-4 | Instrumentation layer, telemetry collector, data flowing to DB |
 | **Phase 4: Dashboard - Section 1** | Day 4-5 | All 6 AI Application Monitoring widgets |
@@ -420,4 +421,4 @@ insureops-ai/
 
 ---
 
-*Project: InsureOps AI | Version: 1.0 | Last Updated: February 2026*
+*Project: InsureOps AI | Version: 1.1 | Last Updated: February 2026*

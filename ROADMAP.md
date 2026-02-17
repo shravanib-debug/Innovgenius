@@ -73,12 +73,12 @@
 
 | # | File | Functionality | Status |
 |---|---|---|---|
-| 7 | `backend/requirements.txt` | Python dependencies: `fastapi`, `uvicorn`, `sqlalchemy`, `asyncpg`, `websockets`, `langchain`, `langgraph`, `langchain-google-genai` / `openai`, `faiss-cpu`, `pymupdf`, `pydantic`, `python-dotenv` | ⬜ |
-| 8 | `backend/main.py` | FastAPI app entry point. Mounts all routers, initializes DB connection pool, starts WebSocket manager, configures CORS for frontend. `uvicorn.run()` at bottom. | ⬜ |
-| 9 | `backend/app/config.py` | Central configuration: loads `.env`, exposes `Settings` class with DB_URL, API keys, port numbers, alert thresholds, model names | ⬜ |
-| 10 | `backend/app/database.py` | SQLAlchemy async engine + session factory. `get_db()` dependency for FastAPI routes. Connection pooling config. | ⬜ |
-| 11 | `backend/app/models/__init__.py` | Exports all SQLAlchemy models | ⬜ |
-| 12 | `backend/app/models/models.py` | SQLAlchemy ORM models matching `schema.sql`: `Trace`, `LLMCall`, `ToolCall`, `GuardrailCheck`, `AlertRule`, `Alert`, `MetricsSnapshot` | ⬜ |
+| 7 | `backend/package.json` | Node.js dependencies: `express`, `cors`, `dotenv`, `pg`, `sequelize`, `ws`, `uuid`, `joi`, `morgan`, `helmet`, `express-async-errors` | ⬜ |
+| 8 | `backend/server.js` | Express.js app entry point. Mounts all routers, initializes DB connection pool, starts WebSocket server, configures CORS for frontend. Listens on configured port. | ⬜ |
+| 9 | `backend/src/config/index.js` | Central configuration: loads `.env` via `dotenv`, exports config object with DB_URL, API keys, port numbers, alert thresholds, model names | ⬜ |
+| 10 | `backend/src/config/database.js` | Sequelize instance + PostgreSQL connection via `pg`. Connection pooling config. Exports `sequelize` instance and connection test utility. | ⬜ |
+| 11 | `backend/src/models/index.js` | Exports all Sequelize models and sets up associations | ⬜ |
+| 12 | `backend/src/models/models.js` | Sequelize ORM models matching `schema.sql`: `Trace`, `LLMCall`, `ToolCall`, `GuardrailCheck`, `AlertRule`, `Alert`, `MetricsSnapshot` | ⬜ |
 
 ---
 
@@ -89,7 +89,7 @@
 | # | File | Functionality | Status |
 |---|---|---|---|
 | 13 | `frontend/package.json` | Dependencies: `react`, `react-dom`, `react-router-dom`, `recharts`, `axios`, `lucide-react`, `date-fns`, `clsx` | ⬜ |
-| 14 | `frontend/vite.config.js` | Vite config: React plugin, dev server proxy to backend (port 8000), build output config | ⬜ |
+| 14 | `frontend/vite.config.js` | Vite config: React plugin, dev server proxy to backend (port 5000), build output config | ⬜ |
 | 15 | `frontend/index.html` | Root HTML: mounts React app, includes Google Fonts (Inter), meta tags, favicon | ⬜ |
 | 16 | `frontend/src/main.jsx` | React entry point: renders `<App />` into `#root`, wraps with BrowserRouter | ⬜ |
 | 17 | `frontend/src/App.jsx` | Root component: sidebar navigation layout, React Router routes for all pages (Overview, Section 1, Section 2, Traces, Alerts, Agents) | ⬜ |
@@ -97,10 +97,10 @@
 
 ### **Phase 1 Checklist:**
 - [ ] `npm create vite@latest ./` in frontend
-- [ ] `pip install -r requirements.txt` in backend
+- [ ] `npm install` in backend
 - [ ] PostgreSQL running with schema applied
 - [ ] Frontend dev server running at `:5173`
-- [ ] Backend server running at `:8000`
+- [ ] Backend server running at `:5000`
 - [ ] Backend returns `{"status": "ok"}` on GET `/health`
 - [ ] Frontend shows sidebar + empty dashboard layout
 
@@ -227,36 +227,36 @@
 
 > **Goal:** REST API + WebSocket endpoints serving metrics, traces, and alerts to the frontend.
 
-### `backend/app/api/`
+### `backend/src/routes/`
 
 | # | File | Functionality | Status |
 |---|---|---|---|
-| 46 | `backend/app/api/__init__.py` | Registers all routers with FastAPI app | ⬜ |
-| 47 | `backend/app/api/metrics.py` | **Metrics endpoints.** `GET /api/metrics/overview` — top-level KPIs (total traces, avg latency, total cost, active alerts); `GET /api/metrics/section1` — all Section 1 metrics (prompt quality, accuracy, latency percentiles, API rates, cost breakdown, drift scores); `GET /api/metrics/section2` — all Section 2 metrics (approval rates, agent performance, decisions, tool usage, escalations, compliance); `GET /api/metrics/agent/{agent_type}` — filtered metrics for one agent. All accept `?timerange=1h|6h|24h|7d` query param. | ⬜ |
-| 48 | `backend/app/api/traces.py` | **Traces endpoints.** `GET /api/traces` — paginated list (params: page, limit, agent_type, decision, status, date_from, date_to); `GET /api/traces/{trace_id}` — full trace detail with nested LLM calls, tool calls, guardrail checks, decision; `GET /api/traces/recent` — last 20 traces for live feed. | ⬜ |
-| 49 | `backend/app/api/agents.py` | **Agent trigger endpoints.** `POST /api/agents/claims/run` — accepts `{claim_description, policy_id, amount}`; `POST /api/agents/underwriting/run` — accepts `{name, age, health_conditions, occupation, coverage_amount}`; `POST /api/agents/fraud/run` — accepts `{claim_id, claimant_id, claim_description, amount}`; `GET /api/agents/status` — health check for all agents. Each POST triggers agent → telemetry collector → returns `{trace_id, decision, summary}`. | ⬜ |
-| 50 | `backend/app/api/alerts.py` | **Alerts endpoints.** `GET /api/alerts` — all alerts (params: severity, acknowledged, date range); `GET /api/alerts/active` — unacknowledged alerts only; `POST /api/alerts/rules` — create new alert rule; `GET /api/alerts/rules` — list all rules; `PUT /api/alerts/{id}/acknowledge` — mark alert as acknowledged; `DELETE /api/alerts/rules/{id}` — remove a rule. | ⬜ |
+| 46 | `backend/src/routes/index.js` | Registers all routers with Express app | ⬜ |
+| 47 | `backend/src/routes/metrics.js` | **Metrics endpoints.** `GET /api/metrics/overview` — top-level KPIs (total traces, avg latency, total cost, active alerts); `GET /api/metrics/section1` — all Section 1 metrics (prompt quality, accuracy, latency percentiles, API rates, cost breakdown, drift scores); `GET /api/metrics/section2` — all Section 2 metrics (approval rates, agent performance, decisions, tool usage, escalations, compliance); `GET /api/metrics/agent/:agent_type` — filtered metrics for one agent. All accept `?timerange=1h|6h|24h|7d` query param. | ⬜ |
+| 48 | `backend/src/routes/traces.js` | **Traces endpoints.** `GET /api/traces` — paginated list (params: page, limit, agent_type, decision, status, date_from, date_to); `GET /api/traces/:trace_id` — full trace detail with nested LLM calls, tool calls, guardrail checks, decision; `GET /api/traces/recent` — last 20 traces for live feed. | ⬜ |
+| 49 | `backend/src/routes/agents.js` | **Agent trigger endpoints.** `POST /api/agents/claims/run` — accepts `{claim_description, policy_id, amount}`; `POST /api/agents/underwriting/run` — accepts `{name, age, health_conditions, occupation, coverage_amount}`; `POST /api/agents/fraud/run` — accepts `{claim_id, claimant_id, claim_description, amount}`; `GET /api/agents/status` — health check for all agents. Each POST triggers agent → telemetry collector → returns `{trace_id, decision, summary}`. | ⬜ |
+| 50 | `backend/src/routes/alerts.js` | **Alerts endpoints.** `GET /api/alerts` — all alerts (params: severity, acknowledged, date range); `GET /api/alerts/active` — unacknowledged alerts only; `POST /api/alerts/rules` — create new alert rule; `GET /api/alerts/rules` — list all rules; `PUT /api/alerts/:id/acknowledge` — mark alert as acknowledged; `DELETE /api/alerts/rules/:id` — remove a rule. | ⬜ |
 
-### `backend/app/core/`
-
-| # | File | Functionality | Status |
-|---|---|---|---|
-| 51 | `backend/app/core/alert_engine.py` | **Alert evaluation engine.** On each new trace ingestion: queries relevant metric (e.g., rolling P95 latency), compares against all active alert rules, fires alerts for breached thresholds. `evaluate_alerts(trace)` — main function. Handles deduplication (don't fire same alert within 5 min window). Updates `alerts` table. Pushes to WebSocket. | ⬜ |
-| 52 | `backend/app/core/analytics.py` | **Analytics engine.** Time-series aggregation queries: `get_latency_percentiles(agent, timerange)`, `get_cost_breakdown(timerange)`, `get_accuracy_trend(agent, timerange)`, `get_escalation_rate(agent, timerange)`, `get_tool_usage_distribution(agent)`, `get_drift_score(agent)`, `get_approval_funnel(agent)`. Optimized SQL queries with proper indexing. | ⬜ |
-
-### `backend/app/`
+### `backend/src/core/`
 
 | # | File | Functionality | Status |
 |---|---|---|---|
-| 53 | `backend/app/websocket.py` | **WebSocket manager.** Manages connected clients. Channels: `dashboard` (metric updates every 5s), `traces` (new traces pushed immediately), `alerts` (alert notifications pushed immediately). `broadcast(channel, data)` sends to all clients on that channel. Handles connect/disconnect gracefully. | ⬜ |
-| 54 | `backend/app/services/metrics_service.py` | **Metrics service layer.** Business logic between API routes and analytics engine. Formats metrics into frontend-expected shapes. Caches frequently requested aggregations (TTL 10s). Handles time range conversions. | ⬜ |
-| 55 | `backend/app/services/trace_service.py` | **Trace service layer.** Fetches and formats trace data. Builds nested trace detail (trace → llm_calls, tool_calls, guardrails). Handles pagination, filtering, sorting logic. | ⬜ |
+| 51 | `backend/src/core/alertEngine.js` | **Alert evaluation engine.** On each new trace ingestion: queries relevant metric (e.g., rolling P95 latency), compares against all active alert rules, fires alerts for breached thresholds. `evaluateAlerts(trace)` — main function. Handles deduplication (don't fire same alert within 5 min window). Updates `alerts` table. Pushes to WebSocket. | ⬜ |
+| 52 | `backend/src/core/analytics.js` | **Analytics engine.** Time-series aggregation queries: `getLatencyPercentiles(agent, timerange)`, `getCostBreakdown(timerange)`, `getAccuracyTrend(agent, timerange)`, `getEscalationRate(agent, timerange)`, `getToolUsageDistribution(agent)`, `getDriftScore(agent)`, `getApprovalFunnel(agent)`. Optimized SQL queries with proper indexing. | ⬜ |
+
+### `backend/src/`
+
+| # | File | Functionality | Status |
+|---|---|---|---|
+| 53 | `backend/src/websocket.js` | **WebSocket manager.** Manages connected clients using the `ws` library. Channels: `dashboard` (metric updates every 5s), `traces` (new traces pushed immediately), `alerts` (alert notifications pushed immediately). `broadcast(channel, data)` sends to all clients on that channel. Handles connect/disconnect gracefully. | ⬜ |
+| 54 | `backend/src/services/metricsService.js` | **Metrics service layer.** Business logic between API routes and analytics engine. Formats metrics into frontend-expected shapes. Caches frequently requested aggregations (TTL 10s). Handles time range conversions. | ⬜ |
+| 55 | `backend/src/services/traceService.js` | **Trace service layer.** Fetches and formats trace data. Builds nested trace detail (trace → llm_calls, tool_calls, guardrails). Handles pagination, filtering, sorting logic. | ⬜ |
 
 ### **Phase 4 Checklist:**
 - [ ] `GET /api/metrics/section1` returns valid JSON with all 6 metric groups
 - [ ] `GET /api/metrics/section2` returns valid JSON with all 6 metric groups
 - [ ] `GET /api/traces` returns paginated trace list
-- [ ] `GET /api/traces/{id}` returns full nested trace
+- [ ] `GET /api/traces/:id` returns full nested trace
 - [ ] `POST /api/agents/claims/run` triggers agent and returns result
 - [ ] WebSocket `/ws/dashboard` sends metric updates to connected clients
 - [ ] `GET /api/alerts/active` returns alerts
@@ -283,7 +283,7 @@
 | # | File | Functionality | Status |
 |---|---|---|---|
 | 60 | `api.js` | **API client.** Axios instance with base URL config. Functions: `getSection1Metrics(range)`, `getSection2Metrics(range)`, `getTraces(params)`, `getTraceDetail(id)`, `triggerAgent(type, input)`, `getAlerts()`, `acknowledgeAlert(id)`. Centralized error handling. | ⬜ |
-| 61 | `websocket.js` | **WebSocket client.** Connects to `ws://localhost:8000/ws/dashboard`. Auto-reconnect on disconnect. Exposes `subscribe(channel, callback)` and `unsubscribe(channel)`. Dispatches incoming messages to registered callbacks. | ⬜ |
+| 61 | `websocket.js` | **WebSocket client.** Connects to `ws://localhost:5000/ws/dashboard`. Auto-reconnect on disconnect. Exposes `subscribe(channel, callback)` and `unsubscribe(channel)`. Dispatches incoming messages to registered callbacks. | ⬜ |
 
 ### `frontend/src/hooks/`
 
@@ -393,8 +393,8 @@
 
 | # | File | Functionality | Status |
 |---|---|---|---|
-| 88 | `backend/app/core/alert_engine.py` | (Verification) Alert engine correctly evaluates all 7 default rules | ⬜ |
-| 89 | `backend/app/api/alerts.py` | (Verification) CRUD endpoints work, acknowledge works | ⬜ |
+| 88 | `backend/src/core/alertEngine.js` | (Verification) Alert engine correctly evaluates all 7 default rules | ⬜ |
+| 89 | `backend/src/routes/alerts.js` | (Verification) CRUD endpoints work, acknowledge works | ⬜ |
 
 ### **Phase 8 Checklist:**
 - [ ] Alerts page shows active alerts
@@ -476,30 +476,31 @@ insureops-ai/
 │   ├── schema.sql                               # Full DB schema
 │   └── seed_data.sql                            # Initial data population
 │
-├── backend/
-│   ├── requirements.txt                         # Python dependencies
-│   ├── main.py                                  # FastAPI entry point
-│   └── app/
-│       ├── config.py                            # Settings & env vars
-│       ├── database.py                          # DB connection & sessions
-│       ├── websocket.py                         # WebSocket manager
+├── backend/                                     # Node.js + Express Backend
+│   ├── package.json                             # Node.js dependencies
+│   ├── server.js                                # Express entry point
+│   └── src/
+│       ├── config/
+│       │   ├── index.js                         # Settings & env vars
+│       │   └── database.js                      # Sequelize + PostgreSQL connection
+│       ├── websocket.js                         # WebSocket manager (ws)
 │       ├── models/
-│       │   ├── __init__.py
-│       │   └── models.py                        # ORM models
-│       ├── api/
-│       │   ├── __init__.py                      # Router registration
-│       │   ├── metrics.py                       # /api/metrics/* endpoints
-│       │   ├── traces.py                        # /api/traces/* endpoints
-│       │   ├── agents.py                        # /api/agents/* endpoints
-│       │   └── alerts.py                        # /api/alerts/* endpoints
+│       │   ├── index.js                         # Model exports & associations
+│       │   └── models.js                        # Sequelize ORM models
+│       ├── routes/
+│       │   ├── index.js                         # Router registration
+│       │   ├── metrics.js                       # /api/metrics/* endpoints
+│       │   ├── traces.js                        # /api/traces/* endpoints
+│       │   ├── agents.js                        # /api/agents/* endpoints
+│       │   └── alerts.js                        # /api/alerts/* endpoints
 │       ├── core/
-│       │   ├── alert_engine.py                  # Alert evaluation logic
-│       │   └── analytics.py                     # Time-series aggregations
+│       │   ├── alertEngine.js                   # Alert evaluation logic
+│       │   └── analytics.js                     # Time-series aggregations
 │       └── services/
-│           ├── metrics_service.py               # Metrics business logic
-│           └── trace_service.py                 # Trace formatting logic
+│           ├── metricsService.js                # Metrics business logic
+│           └── traceService.js                  # Trace formatting logic
 │
-├── agents/
+├── agents/                                      # Insurance AI Agents (Python)
 │   ├── __init__.py                              # Agent exports
 │   ├── base_agent.py                            # Shared agent utilities
 │   ├── claims_agent/
@@ -535,7 +536,7 @@ insureops-ai/
 │   ├── customer_support_sim.py                  # Simulated support agent data
 │   └── seed_data.py                             # Historical data seeder
 │
-├── frontend/
+├── frontend/                                    # React + Vite Dashboard
 │   ├── package.json                             # NPM dependencies
 │   ├── vite.config.js                           # Vite configuration
 │   ├── index.html                               # Root HTML
@@ -620,4 +621,4 @@ The project is **demo-ready** when ALL of the following are true:
 
 ---
 
-*Last Updated: February 16, 2026*
+*Last Updated: February 17, 2026*
