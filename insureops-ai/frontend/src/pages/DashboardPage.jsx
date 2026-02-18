@@ -9,27 +9,11 @@ import { LineChart, Line, ResponsiveContainer, AreaChart, Area } from 'recharts'
 import { getOverviewMetrics, getTraces } from '../services/api';
 import { useApiData } from '../hooks/useApiData';
 
-// Mini sparkline data for KPIs
-const latencySparkline = [
-    { v: 1800 }, { v: 2100 }, { v: 1950 }, { v: 2300 }, { v: 2050 },
-    { v: 1900 }, { v: 2200 }, { v: 2400 }, { v: 2150 }, { v: 1980 },
-    { v: 2100 }, { v: 2050 },
-];
-const costSparkline = [
-    { v: 3.2 }, { v: 4.1 }, { v: 3.8 }, { v: 5.2 }, { v: 4.6 },
-    { v: 5.8 }, { v: 6.1 }, { v: 5.4 }, { v: 7.2 }, { v: 6.8 },
-    { v: 7.5 }, { v: 8.1 },
-];
-const tracesSparkline = [
-    { v: 18 }, { v: 22 }, { v: 15 }, { v: 28 }, { v: 32 },
-    { v: 25 }, { v: 30 }, { v: 35 }, { v: 28 }, { v: 38 },
-    { v: 42 }, { v: 45 },
-];
-const accuracySparkline = [
-    { v: 88 }, { v: 90 }, { v: 87 }, { v: 91 }, { v: 89 },
-    { v: 92 }, { v: 90 }, { v: 93 }, { v: 91 }, { v: 88 },
-    { v: 90 }, { v: 91 },
-];
+// Mini sparkline data for KPIs (Fallbacks)
+const fallbackLat = [{ v: 0 }, { v: 0 }];
+const fallbackCost = [{ v: 0 }, { v: 0 }];
+const fallbackTraces = [{ v: 0 }, { v: 0 }];
+const fallbackAccuracy = [{ v: 100 }, { v: 100 }];
 
 // Agent health data
 const agentHealth = [
@@ -161,6 +145,12 @@ const DashboardPage = () => {
     const totalCost = overview?.totalCost ?? 0;
     const activeAlerts = overview?.activeAlerts ?? 0;
     const successRate = overview?.successRate ?? 100;
+
+    // Map trends to sparkline format { v: value }
+    const tracesSparkline = overview?.traceTrend?.map(t => ({ v: t.value })) || fallbackTraces;
+    const latencySparkline = overview?.latencyTrend?.map(t => ({ v: t.value })) || fallbackLat;
+    const costSparkline = overview?.costTrend?.map(t => ({ v: t.value })) || fallbackCost;
+    const accuracySparkline = overview?.accuracyTrend?.map(t => ({ v: t.value })) || fallbackAccuracy;
 
     return (
         <div className="space-y-6">
