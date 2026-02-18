@@ -421,4 +421,4 @@ insureops-ai/
 
 ---
 
-*Project: InsureOps AI | Version: 1.1 | Last Updated: February 2026*
+*Project: InsureOps AI | Version: 1.2 | Last Updated: February 18, 2026*

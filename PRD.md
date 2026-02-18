@@ -452,19 +452,19 @@ CREATE TABLE alerts (
 ## 12. Acceptance Criteria
 
 ### Must Have (P0)
-- [ ] 3 real agents process inputs and produce decisions with telemetry
-- [ ] Dashboard Section 1 displays all 6 AI application metrics with real data
-- [ ] Dashboard Section 2 displays all 6 LLM agent metrics with real data
-- [ ] Trace viewer shows full execution flow for any agent run
-- [ ] At least 3 alert rules fire correctly when thresholds are breached
-- [ ] Real-time updates work via WebSocket (< 3s latency)
+- [x] 3 real agents process inputs and produce decisions with telemetry
+- [x] Dashboard Section 1 displays all 6 AI application metrics with real data
+- [x] Dashboard Section 2 displays all 6 LLM agent metrics with real data
+- [x] Trace viewer shows full execution flow for any agent run
+- [x] At least 3 alert rules fire correctly when thresholds are breached
+- [x] Real-time updates work via WebSocket (< 3s latency)
 
 ### Should Have (P1)
-- [ ] Simulated customer support agent data populates dashboard
-- [ ] Alert history is searchable and filterable
-- [ ] Dashboard time range selector works across all widgets
-- [ ] Trace viewer shows cost breakdown per step
-- [ ] Agent trigger UI allows manual submission with inline results
+- [x] Simulated customer support agent data populates dashboard
+- [x] Alert history is searchable and filterable
+- [x] Dashboard time range selector works across all widgets
+- [x] Trace viewer shows cost breakdown per step
+- [x] Agent trigger UI allows manual submission with inline results
 
 ### Nice to Have (P2)
 - [ ] Anomaly-based alert detection (statistical, not just threshold)
@@ -474,4 +474,5 @@ CREATE TABLE alerts (
 
 ---
 
-*Document Version: 1.1 | Last Updated: February 17, 2026*
+*Document Version: 1.2 | Last Updated: February 18, 2026*
+

@@ -4,6 +4,7 @@ import AIMonitoringPage from './pages/AIMonitoringPage'
 import Section1Page from './pages/Section1Page'
 import Section2Page from './pages/Section2Page'
 import TracesPage from './pages/TracesPage'
+import TraceDetailPage from './pages/TraceDetailPage'
 import AlertsPage from './pages/AlertsPage'
 import AgentConsolePage from './pages/AgentConsolePage'
 
@@ -20,10 +21,11 @@ function App() {
         <Route path="section1" element={<Section1Page />} />
         <Route path="section2" element={<Section2Page />} />
         <Route path="traces" element={<TracesPage />} />
+        <Route path="traces/:traceId" element={<TraceDetailPage />} />
         <Route path="llm-logs" element={<Section2Page />} />
         <Route path="alerts" element={<AlertsPage />} />
         <Route path="agents" element={<AgentConsolePage />} />
-        {/* Catch-all for dashboard subpages to demo layout */}
+        {/* Catch-all for dashboard subpages */}
         <Route path="*" element={<DashboardPage />} />
       </Route>
     </Routes>

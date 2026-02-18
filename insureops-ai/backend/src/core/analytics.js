@@ -31,7 +31,7 @@ async function getOverviewMetrics(models, timerange = '24h') {
     try {
         const traces = await Trace.findAll({
             where: { created_at: { [Op.gte]: since } },
-            attributes: ['id', 'agent_type', 'total_latency_ms', 'total_cost_usd', 'status', 'output_data'],
+            attributes: ['id', 'agent_type', 'total_latency', 'total_cost', 'status', 'decision_type', 'output_data'],
             raw: true
         });
 
@@ -41,9 +41,9 @@ async function getOverviewMetrics(models, timerange = '24h') {
 
         const totalTraces = traces.length;
         const avgLatency = totalTraces > 0
-            ? Math.round(traces.reduce((sum, t) => sum + (t.total_latency_ms || 0), 0) / totalTraces)
+            ? Math.round(traces.reduce((sum, t) => sum + (t.total_latency || 0), 0) / totalTraces)
             : 0;
-        const totalCost = traces.reduce((sum, t) => sum + (parseFloat(t.total_cost_usd) || 0), 0);
+        const totalCost = traces.reduce((sum, t) => sum + (parseFloat(t.total_cost) || 0), 0);
         const successRate = totalTraces > 0
             ? Math.round((traces.filter(t => t.status === 'success').length / totalTraces) * 100)
             : 100;
@@ -90,7 +90,7 @@ async function getSection1Metrics(models, timerange = '24h') {
 
         const allLLMCalls = traces.flatMap(t => t.llm_calls || []);
         const allToolCalls = traces.flatMap(t => t.tool_calls || []);
-        const latencies = traces.map(t => t.total_latency_ms || 0).sort((a, b) => a - b);
+        const latencies = traces.map(t => t.total_latency || 0).sort((a, b) => a - b);
 
         // Prompt Quality
         const promptScores = allLLMCalls.map(c => parseFloat(c.prompt_quality) || 0).filter(s => s > 0);
@@ -118,7 +118,7 @@ async function getSection1Metrics(models, timerange = '24h') {
         const p99 = _percentile(latencies, 99);
 
         // Latency trend
-        const latencyTrend = _groupByHour(traces, 'created_at', t => t.total_latency_ms || 0);
+        const latencyTrend = _groupByHour(traces, 'created_at', t => t.total_latency || 0);
 
         // API Success/Failure rates
         const successCount = allLLMCalls.filter(c => c.status === 'success').length;
@@ -128,10 +128,10 @@ async function getSection1Metrics(models, timerange = '24h') {
         const costByAgent = {};
         agentTypes.forEach(agent => {
             const agentTraces = traces.filter(t => t.agent_type === agent);
-            costByAgent[agent] = agentTraces.reduce((sum, t) => sum + (parseFloat(t.total_cost_usd) || 0), 0);
+            costByAgent[agent] = agentTraces.reduce((sum, t) => sum + (parseFloat(t.total_cost) || 0), 0);
         });
         const totalCost = Object.values(costByAgent).reduce((a, b) => a + b, 0);
-        const costTrend = _groupByHour(traces, 'created_at', t => parseFloat(t.total_cost_usd) || 0);
+        const costTrend = _groupByHour(traces, 'created_at', t => parseFloat(t.total_cost) || 0);
 
         // Drift score (output distribution stability)
         const driftScore = _calculateDriftScore(traces);
@@ -205,7 +205,7 @@ async function getSection2Metrics(models, timerange = '24h', agentFilter = null)
         // Decision distribution
         const decisions = { approved: 0, rejected: 0, escalated: 0, flagged: 0, other: 0 };
         traces.forEach(t => {
-            const dec = t.output_data?.decision || 'other';
+            const dec = t.decision_type || t.output_data?.decision || 'other';
             decisions[dec] = (decisions[dec] || 0) + 1;
         });
 
@@ -226,10 +226,10 @@ async function getSection2Metrics(models, timerange = '24h', agentFilter = null)
                     ? Math.round((agentTraces.filter(t => t.status === 'success').length / count) * 100)
                     : 100,
                 avgLatency: count > 0
-                    ? Math.round(agentTraces.reduce((s, t) => s + (t.total_latency_ms || 0), 0) / count)
+                    ? Math.round(agentTraces.reduce((s, t) => s + (t.total_latency || 0), 0) / count)
                     : 0,
                 avgCost: count > 0
-                    ? agentTraces.reduce((s, t) => s + (parseFloat(t.total_cost_usd) || 0), 0) / count
+                    ? agentTraces.reduce((s, t) => s + (parseFloat(t.total_cost) || 0), 0) / count
                     : 0
             };
         });
@@ -250,7 +250,7 @@ async function getSection2Metrics(models, timerange = '24h', agentFilter = null)
 
         // Escalation trend
         const escalationTrend = _groupByHour(
-            traces.filter(t => ['escalated', 'flagged'].includes(t.output_data?.decision)),
+            traces.filter(t => ['escalated', 'flagged'].includes(t.decision_type || t.output_data?.decision)),
             'created_at',
             () => 1,
             'sum'
@@ -320,7 +320,7 @@ function _calculateDriftScore(traces) {
     const dist = (arr) => {
         const d = { approved: 0, rejected: 0, escalated: 0 };
         arr.forEach(t => {
-            const dec = t.output_data?.decision || 'other';
+            const dec = t.decision_type || t.output_data?.decision || 'other';
             if (d[dec] !== undefined) d[dec]++;
         });
         const total = arr.length || 1;

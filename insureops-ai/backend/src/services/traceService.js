@@ -25,6 +25,7 @@ async function getTraces(models, params = {}) {
 
     const where = {};
     if (agent_type) where.agent_type = agent_type;
+    if (decision) where.decision_type = decision;
     if (status) where.status = status;
     if (date_from || date_to) {
         where.created_at = {};
@@ -42,17 +43,8 @@ async function getTraces(models, params = {}) {
         raw: true
     });
 
-    // Post-filter by decision (stored in output_data JSONB)
-    let filtered = rows;
-    if (decision) {
-        filtered = rows.filter(t =>
-            t.output_data?.decision === decision ||
-            t.output_data?.decision_type === decision
-        );
-    }
-
     return {
-        traces: filtered.map(_formatTraceListItem),
+        traces: rows.map(_formatTraceListItem),
         pagination: {
             page: parseInt(page),
             limit: parseInt(limit),
@@ -125,8 +117,8 @@ async function getTraceDetail(models, traceId) {
             duration_ms: call.duration_ms,
             status: call.success ? 'success' : 'error',
             details: {
-                input: call.input_data,
-                output: call.output_data,
+                parameters: call.parameters,
+                result_summary: call.result_summary,
                 success: call.success
             }
         });
@@ -155,12 +147,12 @@ async function getTraceDetail(models, traceId) {
         agent_type: plain.agent_type,
         session_id: plain.session_id,
         status: plain.status,
-        total_latency_ms: plain.total_latency_ms,
-        total_cost_usd: parseFloat(plain.total_cost_usd) || 0,
-        total_tokens: plain.total_tokens,
-        decision: plain.output_data?.decision || plain.output_data?.decision_type || null,
-        confidence: plain.output_data?.confidence || null,
-        reasoning: plain.output_data?.reasoning || null,
+        total_latency_ms: plain.total_latency,
+        total_cost_usd: parseFloat(plain.total_cost) || 0,
+        total_tokens: (plain.llm_calls || []).reduce((sum, c) => sum + (c.prompt_tokens || 0) + (c.completion_tokens || 0), 0),
+        decision: plain.decision_type || plain.output_data?.decision || null,
+        confidence: plain.confidence ? parseFloat(plain.confidence) : (plain.output_data?.confidence || null),
+        reasoning: plain.reasoning || plain.output_data?.reasoning || null,
         input_data: plain.input_data,
         output_data: plain.output_data,
         created_at: plain.created_at,
@@ -172,20 +164,24 @@ async function getTraceDetail(models, traceId) {
 }
 
 /**
- * Create a new trace from ingested telemetry data
+ * Create a new trace from agent execution data.
+ * Maps from the agentService format to the actual DB model fields.
  */
 async function createTrace(models, data) {
     const { Trace, LLMCall, ToolCall, GuardrailCheck } = models;
 
-    // Create the main trace record
+    // Create the main trace record — map to actual model fields
     const trace = await Trace.create({
         id: data.trace_id || undefined,
         agent_type: data.agent_type,
-        session_id: data.session_id || null,
+        timestamp: new Date(),
+        total_latency: data.total_latency_ms || 0,
+        total_cost: data.total_cost_usd || 0,
+        decision_type: data.output_data?.decision || null,
+        confidence: data.output_data?.confidence ? data.output_data.confidence / 100 : null,
+        reasoning: data.output_data?.reasoning || null,
+        escalated: ['escalated', 'flagged'].includes(data.output_data?.decision),
         status: data.status || 'success',
-        total_latency_ms: data.total_latency_ms || 0,
-        total_cost_usd: data.total_cost_usd || 0,
-        total_tokens: data.total_tokens || 0,
         input_data: data.input_data || null,
         output_data: data.output_data || null
     });
@@ -211,15 +207,15 @@ async function createTrace(models, data) {
         ));
     }
 
-    // Create tool call records
+    // Create tool call records — using correct model fields
     if (data.tool_calls && data.tool_calls.length > 0) {
         await Promise.all(data.tool_calls.map((call, idx) =>
             ToolCall.create({
                 trace_id: traceId,
                 step_order: call.step_order ?? idx + 1,
                 tool_name: call.tool_name || 'unknown',
-                input_data: call.input_data || null,
-                output_data: call.output_data || null,
+                parameters: call.parameters || null,
+                result_summary: call.result_summary || null,
                 duration_ms: call.duration_ms || 0,
                 success: call.success !== false
             })
@@ -231,7 +227,7 @@ async function createTrace(models, data) {
         await Promise.all(data.guardrail_checks.map(check =>
             GuardrailCheck.create({
                 trace_id: traceId,
-                check_type: check.check_type || 'unknown',
+                check_type: check.check_type || 'safety',
                 passed: check.passed !== false,
                 details: check.details || null
             })
@@ -249,11 +245,12 @@ function _formatTraceListItem(trace) {
         id: trace.id,
         agent_type: trace.agent_type,
         status: trace.status,
-        total_latency_ms: trace.total_latency_ms,
-        total_cost_usd: parseFloat(trace.total_cost_usd) || 0,
-        total_tokens: trace.total_tokens,
-        decision: trace.output_data?.decision || trace.output_data?.decision_type || null,
-        confidence: trace.output_data?.confidence || null,
+        total_latency_ms: trace.total_latency,
+        total_cost_usd: parseFloat(trace.total_cost) || 0,
+        total_tokens: trace.total_tokens || 0,
+        decision: trace.decision_type || trace.output_data?.decision || null,
+        confidence: trace.confidence ? parseFloat(trace.confidence) : null,
+        reasoning: trace.reasoning || null,
         created_at: trace.created_at
     };
 }

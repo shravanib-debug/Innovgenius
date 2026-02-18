@@ -69,10 +69,10 @@ async function _checkRule(rule, trace, models) {
                     created_at: { [Op.gte]: new Date(Date.now() - 60 * 60 * 1000) },
                     ...(agentType ? { agent_type: agentType } : {})
                 },
-                attributes: ['total_latency_ms'],
+                attributes: ['total_latency'],
                 raw: true
             });
-            const latencies = recentTraces.map(t => t.total_latency_ms || 0).sort((a, b) => a - b);
+            const latencies = recentTraces.map(t => t.total_latency || 0).sort((a, b) => a - b);
             currentValue = latencies.length > 0
                 ? latencies[Math.ceil(0.95 * latencies.length) - 1]
                 : 0;
@@ -100,10 +100,10 @@ async function _checkRule(rule, trace, models) {
                     created_at: { [Op.gte]: new Date(Date.now() - 60 * 60 * 1000) },
                     ...(agentType ? { agent_type: agentType } : {})
                 },
-                attributes: ['total_cost_usd'],
+                attributes: ['total_cost'],
                 raw: true
             });
-            currentValue = recentTraces.reduce((sum, t) => sum + (parseFloat(t.total_cost_usd) || 0), 0);
+            currentValue = recentTraces.reduce((sum, t) => sum + (parseFloat(t.total_cost) || 0), 0);
             break;
         }
 
@@ -113,12 +113,12 @@ async function _checkRule(rule, trace, models) {
                     created_at: { [Op.gte]: new Date(Date.now() - 60 * 60 * 1000) },
                     ...(agentType ? { agent_type: agentType } : {})
                 },
-                attributes: ['output_data'],
+                attributes: ['decision_type', 'output_data'],
                 raw: true
             });
             const total = recentTraces.length;
             const escalated = recentTraces.filter(t =>
-                ['escalated', 'flagged'].includes(t.output_data?.decision)
+                ['escalated', 'flagged'].includes(t.decision_type || t.output_data?.decision)
             ).length;
             currentValue = total > 0 ? (escalated / total) * 100 : 0;
             break;
@@ -132,13 +132,13 @@ async function _checkRule(rule, trace, models) {
 
         case 'latency': {
             // Direct latency of this trace
-            currentValue = trace.total_latency_ms || 0;
+            currentValue = trace.total_latency_ms || trace.total_latency || 0;
             break;
         }
 
         case 'cost': {
             // Direct cost of this trace
-            currentValue = parseFloat(trace.total_cost_usd) || 0;
+            currentValue = parseFloat(trace.total_cost_usd || trace.total_cost) || 0;
             break;
         }
 
@@ -173,15 +173,14 @@ async function _fireAlert(rule, trace, models) {
 
     const alert = await Alert.create({
         rule_id: rule.id,
+        rule_name: rule.name,
+        triggered_at: new Date(),
         severity: rule.severity,
-        title: rule.name,
-        description: `Alert: ${rule.name} — ${rule.metric} ${rule.condition} ${rule.threshold} triggered by ${trace.agent_type} agent`,
-        current_value: trace.total_latency_ms || 0,
+        current_value: trace.total_latency_ms || trace.total_latency || 0,
         threshold_value: parseFloat(rule.threshold),
         agent_type: trace.agent_type,
-        trace_id: trace.id || null,
         acknowledged: false,
-        metadata: {
+        details: {
             rule_metric: rule.metric,
             rule_condition: rule.condition,
             trace_id: trace.id,

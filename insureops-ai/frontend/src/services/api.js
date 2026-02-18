@@ -1,0 +1,70 @@
+import axios from 'axios';
+
+const api = axios.create({
+    baseURL: '/api',
+    timeout: 30000,
+    headers: { 'Content-Type': 'application/json' },
+});
+
+// Centralized error handling
+api.interceptors.response.use(
+    (res) => res,
+    (error) => {
+        console.warn('[API Error]', error?.response?.status, error?.message);
+        return Promise.reject(error);
+    }
+);
+
+// ── Metrics ──────────────────────────────────
+export const getOverviewMetrics = (range = '24h') =>
+    api.get(`/metrics/overview?timerange=${range}`).then(r => r.data);
+
+export const getSection1Metrics = (range = '24h') =>
+    api.get(`/metrics/section1?timerange=${range}`).then(r => r.data);
+
+export const getSection2Metrics = (range = '24h') =>
+    api.get(`/metrics/section2?timerange=${range}`).then(r => r.data);
+
+export const getAgentMetrics = (agentType, range = '24h') =>
+    api.get(`/metrics/agent/${agentType}?timerange=${range}`).then(r => r.data);
+
+// ── Traces ───────────────────────────────────
+export const getTraces = (params = {}) =>
+    api.get('/traces', { params }).then(r => r.data);
+
+export const getTraceDetail = (traceId) =>
+    api.get(`/traces/${traceId}`).then(r => r.data);
+
+// ── Agents ───────────────────────────────────
+export const triggerClaimsAgent = (input) =>
+    api.post('/agents/claims/run', input).then(r => r.data);
+
+export const triggerUnderwritingAgent = (input) =>
+    api.post('/agents/underwriting/run', input).then(r => r.data);
+
+export const triggerFraudAgent = (input) =>
+    api.post('/agents/fraud/run', input).then(r => r.data);
+
+export const getAgentsStatus = () =>
+    api.get('/agents/status').then(r => r.data);
+
+// ── Alerts ───────────────────────────────────
+export const getAlerts = (params = {}) =>
+    api.get('/alerts', { params }).then(r => r.data);
+
+export const getActiveAlerts = () =>
+    api.get('/alerts/active').then(r => r.data);
+
+export const acknowledgeAlert = (alertId) =>
+    api.put(`/alerts/${alertId}/acknowledge`).then(r => r.data);
+
+export const getAlertRules = () =>
+    api.get('/alerts/rules').then(r => r.data);
+
+export const createAlertRule = (rule) =>
+    api.post('/alerts/rules', rule).then(r => r.data);
+
+export const deleteAlertRule = (ruleId) =>
+    api.delete(`/alerts/rules/${ruleId}`).then(r => r.data);
+
+export default api;
