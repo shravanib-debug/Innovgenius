@@ -61,7 +61,11 @@ async function getOverviewMetrics(models, timerange = '24h') {
             activeAlerts,
             successRate,
             agentBreakdown: agentCounts,
-            timerange
+            timerange,
+            latencyTrend: _groupByHour(traces, 'created_at', t => t.total_latency || 0),
+            costTrend: _groupByHour(traces, 'created_at', t => parseFloat(t.total_cost) || 0),
+            traceTrend: _groupByHour(traces, 'created_at', () => 1, 'sum'),
+            accuracyTrend: _groupByHour(traces, 'created_at', t => t.status === 'success' ? 100 : 0)
         };
     } catch (error) {
         console.error('Analytics error (overview):', error.message);

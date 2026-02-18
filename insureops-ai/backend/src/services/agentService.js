@@ -9,6 +9,7 @@ const traceService = require('./traceService');
 const metricsService = require('./metricsService');
 const { evaluateAlerts } = require('../core/alertEngine');
 const wsManager = require('../websocket');
+const ragService = require('./ragService');
 
 // ─── System Prompts ─────────────────────────────────────
 
@@ -31,6 +32,7 @@ REJECT (confidence 85-99) when ANY of these are true:
 - Claim amount is absurdly high or unreasonable for the type of damage (e.g. millions for a minor injury)
 - Claim type is clearly not covered (e.g. flood damage on a standard policy without flood rider)
 - Claim description is vague, implausible, or physically impossible
+- Description is gibberish, random characters, or lacks semantic meaning (e.g. "asdf", "hello", "test")
 - Clear signs of fraud or misrepresentation
 - Policy is expired, cancelled, or does not exist
 - Claim violates explicit policy exclusions
@@ -186,9 +188,34 @@ async function runAgent(agentType, inputData, models) {
             throw new Error(`Unknown agent type: ${agentType}`);
     }
 
-    // Step 1: Run tools (simulated)
+    // Step 1: Run tools (simulated + real RAG)
     for (const toolName of toolNames) {
-        const toolResult = simulateToolCall(toolName, inputData);
+        let toolResult;
+
+        if (toolName === 'policy_lookup') {
+            // Real RAG Lookup
+            try {
+                const query = inputData.description || inputData.claim_description || 'General Policy Inquiry';
+                console.log(`🔍 RAG Query: "${query}"`);
+                const ragResponse = await ragService.query(query);
+                console.log(`📄 RAG Result: Found ${ragResponse.length} chars of context`);
+
+                toolResult = {
+                    tool_name: 'policy_lookup',
+                    parameters: { query },
+                    result_summary: `POLICY CONTEXT FOUND:\n${ragResponse}`,
+                    duration_ms: 450,
+                    success: true
+                };
+            } catch (err) {
+                console.error('RAG Error:', err);
+                toolResult = simulateToolCall(toolName, inputData); // Fallback
+            }
+        } else {
+            // Simulated Tools
+            toolResult = simulateToolCall(toolName, inputData);
+        }
+
         toolCalls.push({
             step_order: toolCalls.length + 1,
             tool_name: toolResult.tool_name,
