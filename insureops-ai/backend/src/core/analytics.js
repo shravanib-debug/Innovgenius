@@ -166,7 +166,7 @@ async function getSection1Metrics(models, timerange = '24h') {
             },
             drift: {
                 score: driftScore,
-                status: driftScore > 0.3 ? 'warning' : driftScore > 0.5 ? 'critical' : 'normal'
+                status: driftScore > 0.5 ? 'critical' : driftScore > 0.3 ? 'warning' : 'normal'
             },
             timerange,
             traceCount: traces.length

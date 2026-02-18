@@ -5,7 +5,7 @@ A multi-step agent that analyzes claims for fraud using:
 2. Pattern analysis (tool)
 3. Claimant history lookup (tool)
 4. LLM fraud analysis (with all tool context)
-5. Guardrail checks (compliance, safety)
+5. Guardrail checks (compliance, safety, PII)
 6. Final decision + telemetry
 """
 
@@ -16,11 +16,14 @@ import time
 from typing import TypedDict, Optional
 from dotenv import load_dotenv
 
-from agents.base_agent import (
-    TraceRecord, LLMCallRecord, ToolCallRecord, GuardrailResult,
-    DecisionRecord, Timer, calculate_cost, calculate_prompt_quality,
-    send_telemetry_to_backend, load_json_data
+from agents.base_agent import load_json_data
+from agents.instrumentation.schemas import (
+    TraceRecord, LLMCallRecord, ToolCallRecord, GuardrailResult, DecisionRecord
 )
+from agents.instrumentation.tracer import call_llm, Timer
+from agents.instrumentation.guardrails import check_pii, check_compliance, check_safety
+from agents.instrumentation.collector import send_telemetry
+
 from agents.fraud_agent.tools import (
     duplicate_checker, pattern_analyzer, claimant_history_lookup
 )
@@ -42,54 +45,9 @@ class FraudState(TypedDict):
     trace: Optional[TraceRecord]
 
 
-# ─── LLM Wrapper ────────────────────────────────────
+# ─── Simulation Override ────────────────────────────
 
-def call_llm(prompt: str, system_prompt: str = "", model: str = None) -> tuple[str, LLMCallRecord]:
-    """Call LLM via OpenRouter (OpenAI-compatible API) or simulation fallback."""
-    api_key = os.getenv("OPENROUTER_API_KEY", "")
-    model = model or os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
-
-    with Timer() as timer:
-        if api_key and api_key != "your_openrouter_api_key_here":
-            try:
-                from openai import OpenAI
-
-                client = OpenAI(
-                    base_url="https://openrouter.ai/api/v1",
-                    api_key=api_key
-                )
-
-                messages = []
-                if system_prompt:
-                    messages.append({"role": "system", "content": system_prompt})
-                messages.append({"role": "user", "content": prompt})
-
-                response = client.chat.completions.create(
-                    model=model, messages=messages, temperature=0.1,
-                    response_format={"type": "json_object"}
-                )
-
-                response_text = response.choices[0].message.content
-                prompt_tokens = response.usage.prompt_tokens if response.usage else len(prompt.split()) * 2
-                completion_tokens = response.usage.completion_tokens if response.usage else len(response_text.split()) * 2
-            except Exception as e:
-                print(f"⚠️ LLM call failed, using simulation: {e}")
-                response_text, prompt_tokens, completion_tokens = _simulate_llm_response(prompt)
-        else:
-            response_text, prompt_tokens, completion_tokens = _simulate_llm_response(prompt)
-
-    cost = calculate_cost(prompt_tokens, completion_tokens, model)
-    quality = calculate_prompt_quality(prompt)
-
-    record = LLMCallRecord(
-        model=model, prompt_tokens=prompt_tokens, completion_tokens=completion_tokens,
-        latency_ms=timer.elapsed_ms, cost_usd=cost, status="success",
-        prompt_quality=quality, prompt_text=prompt[:500], response_text=response_text[:500]
-    )
-    return response_text, record
-
-
-def _simulate_llm_response(prompt: str) -> tuple[str, int, int]:
+def _simulate_fraud_response(prompt: str) -> tuple[str, int, int]:
     """Simulate fraud detection LLM response."""
     time.sleep(random.uniform(0.5, 1.8))
 
@@ -202,37 +160,29 @@ def step_llm_analysis(state: FraudState) -> FraudState:
 
 
 def step_guardrails(state: FraudState) -> FraudState:
-    """Step 5: Run compliance and safety guardrails."""
+    """Step 5: Run compliance, safety, and PII guardrails using instrumentation module."""
     analysis = state.get("llm_analysis", {})
     state["guardrail_results"] = []
 
-    # Compliance check — ensure fair investigation procedures
-    compliance_passed = True
-    compliance_detail = "Fraud assessment follows SIU investigation guidelines"
-    if analysis.get("decision") == "escalated" and analysis.get("confidence", 0) < 0.6:
-        compliance_passed = False
-        compliance_detail = "Low-confidence fraud flag — ensure sufficient evidence before SIU referral"
-
-    state["guardrail_results"].append(GuardrailResult(
-        check_type="compliance", passed=compliance_passed, details=compliance_detail
-    ))
-    state["trace"].guardrails.append(state["guardrail_results"][-1])
+    # Compliance check (using consolidated guardrails module)
+    compliance_result = check_compliance(
+        analysis.get("decision", "escalated"),
+        analysis.get("confidence", 0.5),
+        "fraud"
+    )
+    state["guardrail_results"].append(compliance_result)
+    state["trace"].guardrails.append(compliance_result)
 
     # Safety check
-    state["guardrail_results"].append(GuardrailResult(
-        check_type="safety", passed=True,
-        details="No safety concerns in fraud assessment"
-    ))
-    state["trace"].guardrails.append(state["guardrail_results"][-1])
+    safety_result = check_safety(analysis.get("reasoning", ""))
+    state["guardrail_results"].append(safety_result)
+    state["trace"].guardrails.append(safety_result)
 
-    # PII check
+    # PII check on claim description
     description = state["claim_data"].get("description", "")
-    has_pii = any(t in description.lower() for t in ["ssn", "social security", "credit card"])
-    state["guardrail_results"].append(GuardrailResult(
-        check_type="pii", passed=not has_pii,
-        details="No PII detected" if not has_pii else "PII detected — redaction required"
-    ))
-    state["trace"].guardrails.append(state["guardrail_results"][-1])
+    pii_result = check_pii(description)
+    state["guardrail_results"].append(pii_result)
+    state["trace"].guardrails.append(pii_result)
 
     return state
 
@@ -282,7 +232,7 @@ def step_finalize(state: FraudState) -> FraudState:
 
 # ─── Main Agent Runner ──────────────────────────────
 
-def run_fraud_agent(claim_data: dict, send_telemetry: bool = True) -> dict:
+def run_fraud_agent(claim_data: dict, send_telemetry_flag: bool = True) -> dict:
     """Run the Fraud Detection Agent on a single claim."""
     print(f"\n🔎 Fraud Agent — Analyzing claim: {claim_data.get('id', 'N/A')}")
     print(f"   Type: {claim_data.get('claim_type', 'N/A')}")
@@ -322,8 +272,8 @@ def run_fraud_agent(claim_data: dict, send_telemetry: bool = True) -> dict:
     print(f"   ⏱️  Latency: {trace.total_latency_ms}ms")
     print(f"   💰 Cost: ${trace.total_cost_usd:.6f}")
 
-    if send_telemetry:
-        send_telemetry_to_backend(trace)
+    if send_telemetry_flag:
+        send_telemetry(trace)
 
     return {
         "trace_id": trace.trace_id, "decision": decision,
@@ -337,6 +287,6 @@ if __name__ == "__main__":
     claims = load_json_data("sample_claims.json")
     # Test with a fraud-flagged claim (CLM-014 — suspicious fire)
     fraud_claim = next((c for c in claims if c["id"] == "CLM-014"), claims[0])
-    result = run_fraud_agent(fraud_claim, send_telemetry=False)
+    result = run_fraud_agent(fraud_claim, send_telemetry_flag=False)
     print(f"\n📋 Full Result:")
     print(json.dumps(result["decision"], indent=2))

@@ -1,20 +1,19 @@
+import React from 'react';
 import { Outlet } from 'react-router-dom';
-import DashboardSidebar from './DashboardSidebar';
-import DashboardNavbar from './DashboardNavbar';
+import Sidebar from '../shared/Sidebar';
 
-function DashboardLayout() {
+const DashboardLayout = () => {
     return (
-        <div className="flex min-h-screen" style={{ background: 'var(--color-bg-primary)' }}>
-            <DashboardSidebar />
-            <main className="flex-1 flex flex-col min-h-screen transition-all duration-250"
-                style={{ marginLeft: '280px' }}>
-                <DashboardNavbar />
-                <div className="flex-1 p-6 max-w-[1600px] mx-auto w-full">
+        <div className="flex h-screen bg-[--color-bg-primary] text-[--color-text-primary] overflow-hidden">
+            <Sidebar />
+            {/* Main content — offset by sidebar width (240px) */}
+            <main className="ml-[240px] flex-1 overflow-y-auto overflow-x-hidden">
+                <div className="relative min-h-full">
                     <Outlet />
                 </div>
             </main>
         </div>
     );
-}
+};
 
 export default DashboardLayout;

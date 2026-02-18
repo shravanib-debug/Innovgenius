@@ -59,7 +59,7 @@ def seed_all_agents(
 
     for claim in selected_claims:
         try:
-            result = run_claims_agent(claim, send_telemetry=send_telemetry)
+            result = run_claims_agent(claim, send_telemetry_flag=send_telemetry)
             all_results["claims"].append({
                 "claim_id": claim["id"],
                 "decision": result["decision"].get("decision_type"),
@@ -79,7 +79,7 @@ def seed_all_agents(
 
     for applicant in selected_applicants:
         try:
-            result = run_underwriting_agent(applicant, send_telemetry=send_telemetry)
+            result = run_underwriting_agent(applicant, send_telemetry_flag=send_telemetry)
             all_results["underwriting"].append({
                 "applicant_id": applicant["id"],
                 "decision": result["decision"].get("decision_type"),
@@ -101,7 +101,7 @@ def seed_all_agents(
 
     for claim in selected_fraud:
         try:
-            result = run_fraud_agent(claim, send_telemetry=send_telemetry)
+            result = run_fraud_agent(claim, send_telemetry_flag=send_telemetry)
             all_results["fraud"].append({
                 "claim_id": claim["id"],
                 "decision": result["decision"].get("decision_type"),

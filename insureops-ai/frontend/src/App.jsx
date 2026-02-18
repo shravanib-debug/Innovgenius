@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import OverviewPage from './pages/OverviewPage';
+import Section1Page from './pages/Section1Page';
 
 // Placeholder pages
 const PlaceholderPage = ({ title }) => (
@@ -22,7 +23,7 @@ function App() {
       {/* Dashboard with sidebar layout */}
       <Route path="/dashboard" element={<DashboardLayout />}>
         <Route index element={<OverviewPage />} />
-        <Route path="section1" element={<PlaceholderPage title="AI Application Monitoring" />} />
+        <Route path="section1" element={<Section1Page />} />
         <Route path="section2" element={<PlaceholderPage title="LLM Agent Monitoring" />} />
         <Route path="traces" element={<PlaceholderPage title="Trace Explorer" />} />
         <Route path="alerts" element={<PlaceholderPage title="Alerts" />} />

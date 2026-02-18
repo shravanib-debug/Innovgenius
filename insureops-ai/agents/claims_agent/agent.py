@@ -5,7 +5,7 @@ A multi-step agent that processes insurance claims using:
 2. Coverage verification (tool)
 3. RAG context retrieval from policy document
 4. LLM analysis for decision
-5. Guardrail checks (PII, compliance)
+5. Guardrail checks (PII, compliance, bias, safety)
 6. Final decision output + telemetry
 """
 
@@ -16,11 +16,14 @@ import time
 from typing import TypedDict, Optional
 from dotenv import load_dotenv
 
-from agents.base_agent import (
-    TraceRecord, LLMCallRecord, ToolCallRecord, GuardrailResult,
-    DecisionRecord, Timer, calculate_cost, calculate_prompt_quality,
-    send_telemetry_to_backend, load_json_data
+from agents.base_agent import load_json_data
+from agents.instrumentation.schemas import (
+    TraceRecord, LLMCallRecord, ToolCallRecord, GuardrailResult, DecisionRecord
 )
+from agents.instrumentation.tracer import call_llm, Timer
+from agents.instrumentation.guardrails import check_pii, check_compliance, check_safety
+from agents.instrumentation.collector import send_telemetry
+
 from agents.claims_agent.tools import policy_lookup, coverage_checker, payout_calculator
 from agents.claims_agent.rag import get_policy_rag
 from agents.claims_agent.prompts import (
@@ -48,76 +51,14 @@ class ClaimsState(TypedDict):
     trace: Optional[TraceRecord]
 
 
-# ─── LLM Wrapper ────────────────────────────────────
+# ─── Simulation Override ────────────────────────────────
 
-def call_llm(prompt: str, system_prompt: str = "", model: str = None) -> tuple[str, LLMCallRecord]:
-    """
-    Call the LLM via OpenRouter (OpenAI-compatible API).
-    Falls back to a simulated response if no API key is available.
-    """
-    api_key = os.getenv("OPENROUTER_API_KEY", "")
-    model = model or os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
-
-    with Timer() as timer:
-        if api_key and api_key != "your_openrouter_api_key_here":
-            try:
-                from openai import OpenAI
-
-                client = OpenAI(
-                    base_url="https://openrouter.ai/api/v1",
-                    api_key=api_key
-                )
-
-                messages = []
-                if system_prompt:
-                    messages.append({"role": "system", "content": system_prompt})
-                messages.append({"role": "user", "content": prompt})
-
-                response = client.chat.completions.create(
-                    model=model,
-                    messages=messages,
-                    temperature=0.2,
-                    response_format={"type": "json_object"}
-                )
-
-                response_text = response.choices[0].message.content
-                prompt_tokens = response.usage.prompt_tokens if response.usage else len(prompt.split()) * 2
-                completion_tokens = response.usage.completion_tokens if response.usage else len(response_text.split()) * 2
-
-            except Exception as e:
-                print(f"⚠️ LLM call failed, using simulation: {e}")
-                response_text, prompt_tokens, completion_tokens = _simulate_llm_response(prompt)
-        else:
-            # No API key — simulate a realistic response
-            response_text, prompt_tokens, completion_tokens = _simulate_llm_response(prompt)
-
-    cost = calculate_cost(prompt_tokens, completion_tokens, model)
-    quality = calculate_prompt_quality(prompt)
-
-    record = LLMCallRecord(
-        model=model,
-        prompt_tokens=prompt_tokens,
-        completion_tokens=completion_tokens,
-        latency_ms=timer.elapsed_ms,
-        cost_usd=cost,
-        status="success",
-        prompt_quality=quality,
-        prompt_text=prompt[:500],
-        response_text=response_text[:500]
-    )
-
-    return response_text, record
-
-
-def _simulate_llm_response(prompt: str) -> tuple[str, int, int]:
-    """Generate a realistic simulated LLM response for demo purposes."""
-    # Simulate processing time
+def _simulate_claims_response(prompt: str) -> tuple[str, int, int]:
+    """Generate a realistic simulated LLM response for claims processing."""
     time.sleep(random.uniform(0.3, 1.2))
 
     prompt_tokens = len(prompt.split()) * 2
     completion_tokens = random.randint(150, 400)
-
-    # Determine decision based on keywords in the prompt
     prompt_lower = prompt.lower()
 
     if "fraud" in prompt_lower or "suspicious" in prompt_lower:
@@ -229,12 +170,10 @@ def step_llm_analysis(state: ClaimsState) -> ClaimsState:
     )
 
     response_text, llm_record = call_llm(prompt, CLAIMS_SYSTEM_PROMPT)
-
     state["trace"].llm_calls.append(llm_record)
 
     # Parse LLM response
     try:
-        # Try to extract JSON from the response
         json_match = response_text
         if "```json" in response_text:
             json_match = response_text.split("```json")[1].split("```")[0]
@@ -243,7 +182,6 @@ def step_llm_analysis(state: ClaimsState) -> ClaimsState:
 
         analysis = json.loads(json_match.strip())
     except (json.JSONDecodeError, IndexError):
-        # Fallback if JSON parsing fails
         analysis = {
             "decision": "escalated",
             "confidence": 0.60,
@@ -259,50 +197,31 @@ def step_llm_analysis(state: ClaimsState) -> ClaimsState:
 
 
 def step_guardrails(state: ClaimsState) -> ClaimsState:
-    """Step 6: Run guardrail checks (PII, compliance)."""
+    """Step 6: Run guardrail checks using the instrumentation module."""
     claim = state["claim_data"]
     analysis = state.get("llm_analysis", {})
 
-    # PII Check
-    pii_text = f"{claim.get('description', '')} {analysis.get('reasoning', '')}"
-    pii_has_issues = any(
-        indicator in pii_text.lower()
-        for indicator in ['ssn', 'social security', 'credit card', 'bank account']
-    )
-
     state["guardrail_results"] = []
-    state["guardrail_results"].append(GuardrailResult(
-        check_type="pii",
-        passed=not pii_has_issues,
-        details="No PII detected in claim data" if not pii_has_issues else "Potential PII detected — redaction recommended"
-    ))
 
-    state["trace"].guardrails.append(state["guardrail_results"][-1])
+    # PII Check (using consolidated guardrails module)
+    pii_text = f"{claim.get('description', '')} {analysis.get('reasoning', '')}"
+    pii_result = check_pii(pii_text)
+    state["guardrail_results"].append(pii_result)
+    state["trace"].guardrails.append(pii_result)
 
     # Compliance Check
-    decision = analysis.get("decision", "")
-    amount = claim.get("amount", 0)
-    compliance_passed = True
-    compliance_details = "Decision compliant with insurance regulations"
+    compliance_result = check_compliance(
+        analysis.get("decision", "escalated"),
+        analysis.get("confidence", 0.5),
+        "claims"
+    )
+    state["guardrail_results"].append(compliance_result)
+    state["trace"].guardrails.append(compliance_result)
 
-    if decision == "rejected" and analysis.get("confidence", 0) < 0.7:
-        compliance_passed = False
-        compliance_details = "Low-confidence rejection may violate fair claims handling requirements"
-
-    state["guardrail_results"].append(GuardrailResult(
-        check_type="compliance",
-        passed=compliance_passed,
-        details=compliance_details
-    ))
-    state["trace"].guardrails.append(state["guardrail_results"][-1])
-
-    # Safety Check (bias detection)
-    state["guardrail_results"].append(GuardrailResult(
-        check_type="safety",
-        passed=True,
-        details="No bias indicators detected in decision rationale"
-    ))
-    state["trace"].guardrails.append(state["guardrail_results"][-1])
+    # Safety Check (bias detection on reasoning)
+    safety_result = check_safety(analysis.get("reasoning", ""))
+    state["guardrail_results"].append(safety_result)
+    state["trace"].guardrails.append(safety_result)
 
     return state
 
@@ -360,13 +279,13 @@ def step_finalize(state: ClaimsState) -> ClaimsState:
 
 # ─── Main Agent Runner ──────────────────────────────
 
-def run_claims_agent(claim_data: dict, send_telemetry: bool = True) -> dict:
+def run_claims_agent(claim_data: dict, send_telemetry_flag: bool = True) -> dict:
     """
     Run the Claims Processing Agent on a single claim.
 
     Args:
         claim_data: Dictionary with claim details (id, claim_type, description, amount, policy_id, date_of_incident)
-        send_telemetry: Whether to send the trace to the backend
+        send_telemetry_flag: Whether to send the trace to the backend
 
     Returns:
         Dictionary with decision, trace, and output details
@@ -418,9 +337,9 @@ def run_claims_agent(claim_data: dict, send_telemetry: bool = True) -> dict:
     print(f"   ⏱️  Latency: {trace.total_latency_ms}ms")
     print(f"   💰 Cost: ${trace.total_cost_usd:.6f}")
 
-    # Send telemetry
-    if send_telemetry:
-        send_telemetry_to_backend(trace)
+    # Send telemetry via the collector
+    if send_telemetry_flag:
+        send_telemetry(trace)
 
     return {
         "trace_id": trace.trace_id,
@@ -438,6 +357,6 @@ if __name__ == "__main__":
     claims = load_json_data("sample_claims.json")
     sample_claim = claims[0]  # CLM-001: water damage
 
-    result = run_claims_agent(sample_claim, send_telemetry=False)
+    result = run_claims_agent(sample_claim, send_telemetry_flag=False)
     print(f"\n📋 Full Result:")
     print(json.dumps(result["decision"], indent=2))

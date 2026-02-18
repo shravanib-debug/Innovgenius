@@ -16,11 +16,14 @@ import time
 from typing import TypedDict, Optional
 from dotenv import load_dotenv
 
-from agents.base_agent import (
-    TraceRecord, LLMCallRecord, ToolCallRecord, GuardrailResult,
-    DecisionRecord, Timer, calculate_cost, calculate_prompt_quality,
-    send_telemetry_to_backend, load_json_data
+from agents.base_agent import load_json_data
+from agents.instrumentation.schemas import (
+    TraceRecord, LLMCallRecord, ToolCallRecord, GuardrailResult, DecisionRecord
 )
+from agents.instrumentation.tracer import call_llm, Timer
+from agents.instrumentation.guardrails import check_bias, check_compliance
+from agents.instrumentation.collector import send_telemetry
+
 from agents.underwriting_agent.tools import (
     risk_score_calculator, medical_risk_lookup, historical_data_check
 )
@@ -45,54 +48,9 @@ class UnderwritingState(TypedDict):
     trace: Optional[TraceRecord]
 
 
-# ─── LLM Wrapper ────────────────────────────────────
+# ─── Simulation Override ────────────────────────────
 
-def call_llm(prompt: str, system_prompt: str = "", model: str = None) -> tuple[str, LLMCallRecord]:
-    """Call LLM via OpenRouter (OpenAI-compatible API) or simulation fallback."""
-    api_key = os.getenv("OPENROUTER_API_KEY", "")
-    model = model or os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
-
-    with Timer() as timer:
-        if api_key and api_key != "your_openrouter_api_key_here":
-            try:
-                from openai import OpenAI
-
-                client = OpenAI(
-                    base_url="https://openrouter.ai/api/v1",
-                    api_key=api_key
-                )
-
-                messages = []
-                if system_prompt:
-                    messages.append({"role": "system", "content": system_prompt})
-                messages.append({"role": "user", "content": prompt})
-
-                response = client.chat.completions.create(
-                    model=model, messages=messages, temperature=0.2,
-                    response_format={"type": "json_object"}
-                )
-
-                response_text = response.choices[0].message.content
-                prompt_tokens = response.usage.prompt_tokens if response.usage else len(prompt.split()) * 2
-                completion_tokens = response.usage.completion_tokens if response.usage else len(response_text.split()) * 2
-            except Exception as e:
-                print(f"⚠️ LLM call failed, using simulation: {e}")
-                response_text, prompt_tokens, completion_tokens = _simulate_llm_response(prompt)
-        else:
-            response_text, prompt_tokens, completion_tokens = _simulate_llm_response(prompt)
-
-    cost = calculate_cost(prompt_tokens, completion_tokens, model)
-    quality = calculate_prompt_quality(prompt)
-
-    record = LLMCallRecord(
-        model=model, prompt_tokens=prompt_tokens, completion_tokens=completion_tokens,
-        latency_ms=timer.elapsed_ms, cost_usd=cost, status="success",
-        prompt_quality=quality, prompt_text=prompt[:500], response_text=response_text[:500]
-    )
-    return response_text, record
-
-
-def _simulate_llm_response(prompt: str) -> tuple[str, int, int]:
+def _simulate_underwriting_response(prompt: str) -> tuple[str, int, int]:
     """Simulate underwriting LLM response."""
     time.sleep(random.uniform(0.4, 1.5))
 
@@ -100,7 +58,6 @@ def _simulate_llm_response(prompt: str) -> tuple[str, int, int]:
     completion_tokens = random.randint(200, 450)
     prompt_lower = prompt.lower()
 
-    # Determine decision from risk score in prompt
     if "auto_reject" in prompt_lower or "very_high" in prompt_lower:
         decision = "rejected"
         confidence = round(random.uniform(0.82, 0.95), 2)
@@ -202,30 +159,26 @@ def step_llm_assessment(state: UnderwritingState) -> UnderwritingState:
 
 
 def step_guardrails(state: UnderwritingState) -> UnderwritingState:
-    """Step 5: Run bias and compliance guardrail checks."""
+    """Step 5: Run bias and compliance guardrail checks using instrumentation module."""
     analysis = state.get("llm_analysis", {})
     state["guardrail_results"] = []
 
-    # Bias check
-    reasoning = analysis.get("reasoning", "").lower()
-    bias_detected = any(term in reasoning for term in [
-        "gender", "race", "ethnicity", "religion", "orientation"
-    ])
-    state["guardrail_results"].append(GuardrailResult(
-        check_type="bias", passed=not bias_detected,
-        details="No bias indicators in underwriting decision" if not bias_detected else "Potential bias detected — review required"
-    ))
-    state["trace"].guardrails.append(state["guardrail_results"][-1])
+    # Bias check (using consolidated guardrails module)
+    bias_result = check_bias(
+        analysis.get("reasoning", ""),
+        state.get("applicant_data", {})
+    )
+    state["guardrail_results"].append(bias_result)
+    state["trace"].guardrails.append(bias_result)
 
     # Compliance check
-    compliance_passed = True
-    if analysis.get("decision") == "rejected" and analysis.get("confidence", 0) < 0.7:
-        compliance_passed = False
-    state["guardrail_results"].append(GuardrailResult(
-        check_type="compliance", passed=compliance_passed,
-        details="Decision meets regulatory compliance standards" if compliance_passed else "Low-confidence rejection may require additional justification"
-    ))
-    state["trace"].guardrails.append(state["guardrail_results"][-1])
+    compliance_result = check_compliance(
+        analysis.get("decision", "escalated"),
+        analysis.get("confidence", 0.5),
+        "underwriting"
+    )
+    state["guardrail_results"].append(compliance_result)
+    state["trace"].guardrails.append(compliance_result)
 
     return state
 
@@ -282,7 +235,7 @@ def step_finalize(state: UnderwritingState) -> UnderwritingState:
 
 # ─── Main Agent Runner ──────────────────────────────
 
-def run_underwriting_agent(applicant_data: dict, send_telemetry: bool = True) -> dict:
+def run_underwriting_agent(applicant_data: dict, send_telemetry_flag: bool = True) -> dict:
     """Run the Underwriting Risk Agent on a single applicant."""
     print(f"\n📋 Underwriting Agent — Assessing: {applicant_data.get('name', 'N/A')}")
     print(f"   Age: {applicant_data.get('age')}, Occupation: {applicant_data.get('occupation')}")
@@ -321,8 +274,8 @@ def run_underwriting_agent(applicant_data: dict, send_telemetry: bool = True) ->
     print(f"   ⏱️  Latency: {trace.total_latency_ms}ms")
     print(f"   💰 Cost: ${trace.total_cost_usd:.6f}")
 
-    if send_telemetry:
-        send_telemetry_to_backend(trace)
+    if send_telemetry_flag:
+        send_telemetry(trace)
 
     return {
         "trace_id": trace.trace_id, "decision": decision,
@@ -332,6 +285,6 @@ def run_underwriting_agent(applicant_data: dict, send_telemetry: bool = True) ->
 
 if __name__ == "__main__":
     applicants = load_json_data("sample_applicants.json")
-    result = run_underwriting_agent(applicants[0], send_telemetry=False)
+    result = run_underwriting_agent(applicants[0], send_telemetry_flag=False)
     print(f"\n📋 Full Result:")
     print(json.dumps(result["decision"], indent=2))

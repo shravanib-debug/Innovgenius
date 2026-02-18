@@ -14,22 +14,22 @@ const navItems = [
     {
         section: 'Dashboard',
         links: [
-            { path: '/', label: 'Overview', icon: LayoutDashboard },
+            { path: '/dashboard', label: 'Overview', icon: LayoutDashboard },
         ]
     },
     {
         section: 'Monitoring',
         links: [
-            { path: '/section1', label: 'AI Monitoring', icon: Activity },
-            { path: '/section2', label: 'Agent Monitoring', icon: Bot },
+            { path: '/dashboard/section1', label: 'AI Monitoring', icon: Activity },
+            { path: '/dashboard/section2', label: 'Agent Monitoring', icon: Bot },
         ]
     },
     {
         section: 'Operations',
         links: [
-            { path: '/traces', label: 'Trace Explorer', icon: FileSearch },
-            { path: '/alerts', label: 'Alerts', icon: Bell },
-            { path: '/agents', label: 'Agent Console', icon: Terminal },
+            { path: '/dashboard/traces', label: 'Trace Explorer', icon: FileSearch },
+            { path: '/dashboard/alerts', label: 'Alerts', icon: Bell },
+            { path: '/dashboard/agents', label: 'Agent Console', icon: Terminal },
         ]
     },
 ];

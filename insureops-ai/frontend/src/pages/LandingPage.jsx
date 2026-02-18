@@ -1,483 +1,220 @@
-import { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, Play, Sparkles } from 'lucide-react';
-import { AboutDemo } from '@/components/blocks/cta-section-with-gallery';
+import { Shield, ChevronRight, Activity, BarChart3, Lock, Sparkles } from 'lucide-react';
 
-/* ─── 4-pointed pinwheel / origami star (matches reference) ─── */
-const PinwheelStar = ({ size = 48, style = {} }) => (
-    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style}>
-        {/* Top triangle — orange */}
-        <polygon points="32,4 38,28 26,28" fill="#f97316" />
-        {/* Right triangle — red/pink */}
-        <polygon points="60,32 36,26 36,38" fill="#ef4444" />
-        {/* Bottom triangle — dark red */}
-        <polygon points="32,60 26,36 38,36" fill="#dc2626" />
-        {/* Left triangle — warm yellow */}
-        <polygon points="4,32 28,38 28,26" fill="#fbbf24" />
-    </svg>
-);
-
-/* ─── Asterisk / Snowflake logo SVG ─── */
-const LogoIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <line x1="12" y1="1" x2="12" y2="23" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
-        <line x1="1" y1="12" x2="23" y2="12" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
-        <line x1="4.2" y1="4.2" x2="19.8" y2="19.8" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
-        <line x1="19.8" y1="4.2" x2="4.2" y2="19.8" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="12" cy="12" r="2.5" fill="#f97316" />
-    </svg>
-);
-
-function LandingPage() {
-    const [hoveredLink, setHoveredLink] = useState(null);
-
+const LandingPage = () => {
     return (
-        <div className="min-h-screen relative overflow-hidden" style={{ background: '#060504' }}>
+        <div className="min-h-screen bg-[--color-bg-primary] text-[--color-text-primary] font-sans overflow-x-hidden selection:bg-[--color-accent]/30 selection:text-white">
 
-            {/* ═══════════════════════════════════════════
-          BACKGROUND — Dark lines BEHIND, orange glow IN THE MIDDLE
-       ═══════════════════════════════════════════ */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-
-                {/* ── Dark vertical lines BEHIND everything ── */}
-                {[
-                    { left: '8%', opacity: 0.04 },
-                    { left: '13%', opacity: 0.05 },
-                    { left: '18%', opacity: 0.06 },
-                    { left: '23%', opacity: 0.07 },
-                    { left: '28%', opacity: 0.08 },
-                    { left: '33%', opacity: 0.10 },
-                    { left: '37%', opacity: 0.12 },
-                    { left: '41%', opacity: 0.14 },
-                    { left: '45%', opacity: 0.16 },
-                    { left: '48%', opacity: 0.18 },
-                    { left: '50%', opacity: 0.18 },
-                    { left: '52%', opacity: 0.18 },
-                    { left: '55%', opacity: 0.16 },
-                    { left: '59%', opacity: 0.14 },
-                    { left: '63%', opacity: 0.12 },
-                    { left: '67%', opacity: 0.10 },
-                    { left: '72%', opacity: 0.08 },
-                    { left: '77%', opacity: 0.07 },
-                    { left: '82%', opacity: 0.06 },
-                    { left: '87%', opacity: 0.05 },
-                    { left: '92%', opacity: 0.04 },
-                ].map((line, i) => (
-                    <div
-                        key={i}
-                        className="absolute top-0 h-full"
-                        style={{
-                            left: line.left,
-                            width: i % 2 === 0 ? '1px' : '2px',
-                            opacity: line.opacity,
-                            background: 'linear-gradient(180deg, rgba(180, 120, 60, 0.6) 0%, rgba(140, 90, 40, 0.4) 30%, rgba(100, 60, 20, 0.15) 60%, transparent 85%)',
-                            maskImage: 'linear-gradient(to bottom, black 0%, black 35%, transparent 80%)',
-                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 35%, transparent 80%)',
-                        }}
-                    />
-                ))}
-
-                {/* ── ORANGE GLOW — centered in the MIDDLE of the hero area ── */}
-                <div className="absolute left-1/2 -translate-x-1/2"
-                    style={{
-                        top: '100px',
-                        width: '900px',
-                        height: '500px',
-                        background: 'radial-gradient(ellipse 80% 60% at 50% 40%, rgba(200, 80, 0, 0.7) 0%, rgba(160, 60, 0, 0.35) 30%, rgba(120, 40, 0, 0.12) 55%, transparent 75%)',
-                    }} />
-                {/* Inner hot core glow */}
-                <div className="absolute left-1/2 -translate-x-1/2"
-                    style={{
-                        top: '130px',
-                        width: '500px',
-                        height: '350px',
-                        background: 'radial-gradient(ellipse 70% 50% at 50% 35%, rgba(240, 130, 30, 0.45) 0%, rgba(200, 80, 0, 0.15) 50%, transparent 75%)',
-                    }} />
-
-                {/* ── Horizontal glow accent bar ── */}
-                <div className="absolute left-1/2 -translate-x-1/2 w-[65%] h-[2px]"
-                    style={{ top: '100px', background: 'linear-gradient(90deg, transparent, rgba(255, 160, 50, 0.4) 25%, rgba(255, 180, 70, 0.8) 50%, rgba(255, 160, 50, 0.4) 75%, transparent)', filter: 'blur(1px)' }} />
-                <div className="absolute left-1/2 -translate-x-1/2 w-[50%] h-[40px]"
-                    style={{ top: '82px', background: 'linear-gradient(90deg, transparent, rgba(220, 110, 20, 0.08) 25%, rgba(240, 140, 40, 0.18) 50%, rgba(220, 110, 20, 0.08) 75%, transparent)' }} />
-
-                {/* ── Bottom warm ambient ── */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1200px] h-[350px] rounded-full opacity-15 blur-[100px]"
-                    style={{ background: 'radial-gradient(circle, #c06818 0%, #7a3a10 40%, transparent 70%)' }} />
-            </div>
-
-
-            {/* ═══════════════════════════════════════════
-          DECORATIVE PINWHEEL STARS (matching reference)
-       ═══════════════════════════════════════════ */}
-
-            {/* Left star — near headline left side */}
-            <motion.div
-                className="absolute z-10"
-                style={{ top: '310px', left: '13%' }}
-                animate={{ y: [-5, 5, -5], rotate: [0, 10, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            >
-                <PinwheelStar size={48} />
-            </motion.div>
-
-            {/* Right star — larger, to the right of "Growth" */}
-            <motion.div
-                className="absolute z-10"
-                style={{ top: '260px', right: '14%' }}
-                animate={{ y: [4, -8, 4], rotate: [0, -15, 0] }}
-                transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-            >
-                <PinwheelStar size={52} style={{ transform: 'rotate(15deg)' }} />
-            </motion.div>
-
-            {/* Bottom-right star — smaller accent */}
-            <motion.div
-                className="absolute z-10"
-                style={{ bottom: '35%', right: '8%' }}
-                animate={{ y: [3, -5, 3], rotate: [0, 20, 0] }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-            >
-                <PinwheelStar size={32} style={{ transform: 'rotate(-20deg)' }} />
-            </motion.div>
-
-
-            {/* ═══════════════════════════════════════════
-          NAVBAR — Fixed, taller, transparent
-       ═══════════════════════════════════════════ */}
-            <motion.nav
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.6 }}
-                className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 lg:px-16 xl:px-24 py-6"
-                style={{
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
-                    background: 'rgba(6, 5, 4, 0.4)',
-                }}
-            >
-                {/* Logo — left: orange asterisk + "Savio" */}
-                <Link to="/" className="flex items-center gap-2.5 no-underline">
-                    <LogoIcon />
-                    <span className="text-[16px] font-medium tracking-tight" style={{ color: '#ffffff' }}>
-                        Savio
-                    </span>
-                </Link>
-
-                {/* Nav Links — centered */}
-                <div className="hidden md:flex items-center gap-8">
-                    {['Home', 'Pricing', 'Features', 'Resources', 'About'].map((item) => (
-                        <a
-                            key={item}
-                            href="#"
-                            className="text-[14px] font-light no-underline transition-opacity duration-200"
-                            style={{
-                                color: 'rgba(255, 255, 255, 0.6)',
-                                opacity: hoveredLink === item ? 1 : 0.85,
-                            }}
-                            onMouseEnter={() => setHoveredLink(item)}
-                            onMouseLeave={() => setHoveredLink(null)}
-                        >
-                            {item}
-                        </a>
-                    ))}
-                </div>
-
-                {/* Get Started — WHITE pill, dark text */}
-                <Link
-                    to="/dashboard"
-                    className="hidden md:flex items-center justify-center rounded-full text-[14px] font-medium no-underline transition-all duration-200 hover:opacity-90"
-                    style={{
-                        background: '#ffffff',
-                        color: '#111111',
-                        padding: '10px 24px',
-                    }}
-                >
-                    Get Started
-                </Link>
-            </motion.nav>
-
-            {/* Spacer for fixed navbar */}
-            <div className="h-20" />
-
-
-            {/* ═══════════════════════════════════════════
-          HERO SECTION — Centered
-       ═══════════════════════════════════════════ */}
-            <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 min-h-[calc(100vh-5rem)]">
-
-                {/* Announcement badge */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="flex items-center gap-2 px-5 py-2 rounded-full mb-10 lg:mb-12 text-[13px] font-normal tracking-wide"
-                    style={{
-                        background: 'rgba(200, 120, 40, 0.06)',
-                        border: '1px solid rgba(200, 120, 40, 0.2)',
-                        color: 'rgba(220, 160, 80, 0.85)'
-                    }}
-                >
-                    <span style={{ fontSize: '12px' }}>✦</span>
-                    We are launching soon. Stay Tuned
-                </motion.div>
-
-                {/* Headline */}
-                <motion.h1
-                    initial={{ y: 30, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.7, delay: 0.3 }}
-                    className="text-[2.75rem] sm:text-[3.5rem] lg:text-[4.5rem] font-semibold leading-[1.1] tracking-[-0.02em] max-w-4xl mb-7"
-                    style={{ color: '#f1ebe4' }}
-                >
-                    Take Control Of Your
-                    <br />
-                    Financial{' '}
-                    <span
-                        className="italic font-normal font-serif"
-                    >
-                        Growth
-                    </span>
-                </motion.h1>
-
-                {/* Subtitle */}
-                <motion.p
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.5 }}
-                    className="text-[15px] max-w-md mb-12 lg:mb-14 leading-relaxed"
-                    style={{ color: 'rgba(168, 152, 136, 0.8)' }}
-                >
-                    AI-powered money management that helps you grow
-                    <br className="hidden sm:block" />
-                    savings without changing your lifestyle.
-                </motion.p>
-
-                {/* CTA Buttons — centered, larger & brighter */}
-                <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.6 }}
-                    className="relative z-20 flex items-center gap-5 mb-10"
-                >
-                    <Link
-                        to="/dashboard"
-                        className="flex items-center justify-center gap-2 px-10 py-5 rounded-full text-[17px] font-semibold text-white no-underline transition-all duration-300 hover:shadow-[0_0_40px_rgba(249,115,22,0.5)] hover:-translate-y-0.5"
-                        style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', minWidth: '220px' }}
-                    >
-                        Start Saving Today
+            {/* ════════ NAVBAR ════════ */}
+            <nav className="fixed w-full z-50 top-0 bg-transparent">
+                <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 lg:px-20 py-5">
+                    {/* Logo */}
+                    <Link to="/" className="flex items-center gap-2.5 group">
+                        <div className="w-8 h-8 bg-gradient-to-br from-[--color-accent] to-amber-700 rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:shadow-[--color-accent]/20 transition-shadow">
+                            <Shield className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-lg font-semibold tracking-tight">
+                            InsureOps <span className="text-[--color-accent]">AI</span>
+                        </span>
                     </Link>
 
-                    <a
-                        href="#demo"
-                        className="flex items-center justify-center gap-2 px-10 py-5 rounded-full text-[17px] font-medium no-underline transition-all duration-300 hover:bg-white/[0.1]"
-                        style={{
-                            background: 'rgba(255, 255, 255, 0.03)',
-                            border: '1px solid rgba(255, 255, 255, 0.2)',
-                            color: '#f1ebe4',
-                            minWidth: '200px'
-                        }}
+                    {/* Center Nav */}
+                    <div className="hidden md:flex items-center gap-8">
+                        <a href="#" className="nav-link">Home</a>
+                        <a href="#features" className="nav-link">Features</a>
+                        <a href="#" className="nav-link">Pricing</a>
+                        <a href="#" className="nav-link">Resources</a>
+                        <a href="#" className="nav-link">About</a>
+                    </div>
+
+                    {/* CTA */}
+                    <Link
+                        to="/dashboard"
+                        className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium border border-white/20 rounded-full text-[--color-text-secondary] hover:text-white hover:border-white/40 transition-all"
                     >
-                        <Play size={16} fill="currentColor" className="opacity-80" />
-                        Watch Demo
-                    </a>
-                </motion.div>
-            </div>
+                        Get Started <ChevronRight className="w-3.5 h-3.5" />
+                    </Link>
+                </div>
+            </nav>
 
+            {/* ════════ HERO SECTION ════════ */}
+            <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
 
-            {/* ═══════════════════════════════════════════
-          DASHBOARD MOCKUP — CENTERED, floating
-       ═══════════════════════════════════════════ */}
-            <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.9, delay: 0.8 }}
-                className="relative z-10 mx-auto px-6"
-                style={{ maxWidth: '960px', marginBottom: '-80px' }}
-            >
-                <div
-                    className="rounded-2xl overflow-hidden"
-                    style={{
-                        boxShadow: '0 -4px 60px rgba(180, 90, 20, 0.15), 0 20px 80px rgba(0, 0, 0, 0.5)',
-                        border: '1px solid rgba(168, 144, 112, 0.12)',
-                        background: 'linear-gradient(180deg, #191512 0%, #110f0c 100%)',
-                    }}
-                >
-                    <div className="p-5 sm:p-6">
-                        {/* Dashboard navbar */}
-                        <div className="flex items-center justify-between mb-5 pb-3" style={{ borderBottom: '1px solid rgba(168, 144, 112, 0.06)' }}>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #e8722a, #f2923c)' }}>
-                                        <span className="text-[8px] text-white font-bold">✦</span>
-                                    </div>
-                                    <span className="text-[11px] font-bold" style={{ color: '#a89888' }}>Savio</span>
+                {/* ── Background layers ── */}
+                {/* Warm amber streaks (stage curtain feel) */}
+                <div className="absolute inset-0 hero-ambient-streaks"></div>
+
+                {/* Bottom-center radial glow */}
+                <div className="absolute inset-0 hero-glow"></div>
+
+                {/* Decorative blobs */}
+                <div className="deco-blob-1" style={{ left: '-5%', top: '35%' }}></div>
+                <div className="deco-blob-2" style={{ right: '-3%', bottom: '10%' }}></div>
+
+                {/* ── Content ── */}
+                <div className="relative z-10 text-center px-6 md:px-12 lg:px-20 max-w-[900px] mx-auto pt-24 pb-8">
+
+                    {/* Announcement badge */}
+                    <div className="animate-fade-in-up">
+                        <span className="badge-pill">
+                            <Sparkles className="w-3.5 h-3.5 text-[--color-accent]" />
+                            Now in Public Beta — v1.0
+                        </span>
+                    </div>
+
+                    {/* Headline */}
+                    <h1 className="mt-8 text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] animate-fade-in-up delay-100">
+                        <span className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/60">
+                            AI Observability for
+                        </span>
+                        <br />
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[--color-accent] via-amber-400 to-[--color-accent]">
+                            Smart{' '}
+                        </span>
+                        <span className="font-display italic bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-[--color-accent]">
+                            Insurance
+                        </span>
+                    </h1>
+
+                    {/* Subtitle */}
+                    <p className="mt-6 text-base md:text-lg text-[--color-text-secondary] max-w-xl mx-auto leading-relaxed animate-fade-in-up delay-200" style={{ opacity: 0.65 }}>
+                        Monitor, audit, and trust your AI agents. From claims processing to underwriting, gain complete visibility into every decision.
+                    </p>
+
+                    {/* CTA Buttons */}
+                    <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300">
+                        <Link to="/dashboard" className="btn-primary">
+                            Launch Dashboard <ChevronRight className="w-4 h-4" />
+                        </Link>
+                        <a href="#features" className="btn-secondary">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+
+                {/* ── Floating Dashboard Preview ── */}
+                <div className="relative z-10 w-full max-w-5xl mx-auto px-6 md:px-12 mt-4 mb-[-40px] animate-fade-in-up delay-400">
+                    <div className="dashboard-preview">
+                        {/* Mock Dashboard UI */}
+                        <div className="bg-[#0e0e0e] p-4 md:p-6">
+                            {/* Top bar */}
+                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-red-500/70"></div>
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500/70"></div>
+                                    <div className="w-3 h-3 rounded-full bg-green-500/70"></div>
                                 </div>
-                                <div className="hidden sm:flex items-center gap-3 ml-2 text-[9px]" style={{ color: '#5a4a3a' }}>
-                                    <span>☐</span><span>☆</span>
-                                    <span className="font-medium" style={{ color: '#7a6550' }}>Dashboards</span>
-                                    <span>|</span>
-                                    <span>Default</span>
+                                <div className="h-6 w-48 bg-white/5 rounded-md"></div>
+                                <div className="flex gap-2">
+                                    <div className="h-6 w-16 bg-white/5 rounded-md"></div>
+                                    <div className="h-6 w-16 bg-[--color-accent]/20 rounded-md"></div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-24 h-6 rounded-md flex items-center gap-1 px-2"
-                                    style={{ background: 'rgba(168, 144, 112, 0.05)', border: '1px solid rgba(168, 144, 112, 0.07)' }}>
-                                    <span className="text-[8px]" style={{ color: '#5a4a3a' }}>🔍 Search...</span>
+                            {/* Dashboard content grid */}
+                            <div className="grid grid-cols-4 gap-3 mb-4">
+                                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                                    <div className="h-2 w-16 bg-white/10 rounded mb-2"></div>
+                                    <div className="h-5 w-12 bg-[--color-accent]/30 rounded"></div>
                                 </div>
-                                {[1, 2, 3, 4].map(i => <div key={i} className="w-5 h-5 rounded-full" style={{ background: 'rgba(168, 144, 112, 0.05)' }} />)}
+                                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                                    <div className="h-2 w-20 bg-white/10 rounded mb-2"></div>
+                                    <div className="h-5 w-10 bg-emerald-500/30 rounded"></div>
+                                </div>
+                                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                                    <div className="h-2 w-14 bg-white/10 rounded mb-2"></div>
+                                    <div className="h-5 w-14 bg-blue-500/30 rounded"></div>
+                                </div>
+                                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
+                                    <div className="h-2 w-18 bg-white/10 rounded mb-2"></div>
+                                    <div className="h-5 w-8 bg-amber-500/30 rounded"></div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="flex gap-4">
-                            {/* Sidebar */}
-                            <div className="hidden lg:block w-40 flex-shrink-0 pr-3" style={{ borderRight: '1px solid rgba(168, 144, 112, 0.05)' }}>
-                                {[
-                                    { title: 'Favorites', items: [{ l: 'Overview' }, { l: 'Projects' }] },
-                                    { title: 'Dashboards', items: [{ l: 'Overview', a: true }, { l: 'eCommerce' }, { l: 'Projects' }] },
-                                    { title: 'Pages', items: [{ l: 'User Profile' }] },
-                                ].map(section => (
-                                    <div key={section.title} className="mb-3">
-                                        <div className="text-[7px] uppercase tracking-[0.15em] mb-1 px-1 font-medium" style={{ color: '#4a3e34' }}>{section.title}</div>
-                                        {section.items.map(item => (
-                                            <div key={item.l + section.title} className="flex items-center gap-1.5 px-1 py-1 rounded-md mb-px"
-                                                style={{ background: item.a ? 'rgba(232, 114, 42, 0.08)' : 'transparent' }}>
-                                                {item.a && <div className="w-[2px] h-2.5 rounded-full" style={{ background: '#e8722a' }} />}
-                                                <div className="w-2.5 h-2.5 rounded-sm" style={{ background: item.a ? '#e8722a' : 'rgba(168, 144, 112, 0.1)' }} />
-                                                <span className="text-[9px]" style={{ color: item.a ? '#d4944a' : '#5a4a3a' }}>{item.l}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Center content */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between mb-3">
-                                    <span className="text-[12px] font-semibold" style={{ color: '#d5c4a1' }}>Overview</span>
-                                    <div className="text-[9px] px-2 py-0.5 rounded" style={{ color: '#7a6550', background: 'rgba(168, 144, 112, 0.05)' }}>Today ▾</div>
-                                </div>
-
-                                {/* Stat cards */}
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 mb-4">
-                                    {[
-                                        { label: 'Views', value: '7,265', change: '+11.01%', up: true },
-                                        { label: 'Visits', value: '3,671', change: '-0.03%', up: false },
-                                        { label: 'New Users', value: '256', change: '+15.03%', up: true },
-                                        { label: 'Active Users', value: '2,318', change: '+6.08%', up: true },
-                                    ].map((s) => (
-                                        <div key={s.label} className="rounded-lg p-3"
-                                            style={{ background: 'rgba(168, 144, 112, 0.03)', border: '1px solid rgba(168, 144, 112, 0.06)' }}>
-                                            <div className="text-[8px] uppercase tracking-wider mb-1" style={{ color: '#5a4a3a' }}>{s.label}</div>
-                                            <div className="flex items-baseline gap-1.5">
-                                                <span className="text-base font-bold" style={{ color: '#e8ddd0' }}>{s.value}</span>
-                                                <span className="text-[8px] font-semibold" style={{ color: s.up ? '#22c55e' : '#ef4444' }}>
-                                                    {s.change} {s.up ? '↗' : '↘'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                {/* Chart + Traffic */}
-                                <div className="flex gap-2.5">
-                                    <div className="flex-1 rounded-lg p-3"
-                                        style={{ background: 'rgba(168, 144, 112, 0.03)', border: '1px solid rgba(168, 144, 112, 0.06)' }}>
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <span className="text-[10px] font-semibold" style={{ color: '#a89888' }}>Total Users</span>
-                                            <span className="text-[8px]" style={{ color: '#4a3e34' }}>Total Projects</span>
-                                            <span className="text-[8px]" style={{ color: '#4a3e34' }}>Operating Status</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 text-[7px] mb-2" style={{ color: '#4a3e34' }}>
-                                            <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full inline-block" style={{ background: '#e8722a' }} /> This year</span>
-                                            <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full inline-block" style={{ background: '#3d3028' }} /> Last year</span>
-                                        </div>
-                                        <div className="h-20">
-                                            <svg viewBox="0 0 400 70" className="w-full h-full" preserveAspectRatio="none">
-                                                <defs>
-                                                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="0%" stopColor="rgba(232,114,42,0.12)" />
-                                                        <stop offset="100%" stopColor="rgba(232,114,42,0)" />
-                                                    </linearGradient>
-                                                </defs>
-                                                {[18, 36, 54].map(y => <line key={y} x1="0" y1={y} x2="400" y2={y} stroke="rgba(168,144,112,0.04)" strokeWidth="0.5" />)}
-                                                <polyline fill="none" stroke="rgba(168,144,112,0.1)" strokeWidth="1"
-                                                    points="0,48 45,44 90,52 135,40 180,50 225,36 270,42 315,30 360,36 400,32" />
-                                                <polygon fill="url(#areaGrad)"
-                                                    points="0,44 45,36 90,42 135,25 180,32 225,18 270,22 315,12 360,16 400,10 400,70 0,70" />
-                                                <polyline fill="none" stroke="#d97218" strokeWidth="1.5"
-                                                    points="0,44 45,36 90,42 135,25 180,32 225,18 270,22 315,12 360,16 400,10" />
-                                            </svg>
-                                        </div>
-                                    </div>
-
-                                    {/* Traffic */}
-                                    <div className="hidden lg:block w-36 rounded-lg p-3"
-                                        style={{ background: 'rgba(168, 144, 112, 0.03)', border: '1px solid rgba(168, 144, 112, 0.06)' }}>
-                                        <span className="text-[10px] font-semibold block mb-2.5" style={{ color: '#a89888' }}>Traffic by Website</span>
-                                        {[{ n: 'Google', p: 75 }, { n: 'YouTube', p: 55 }, { n: 'Instagram', p: 35 }, { n: 'Pinterest', p: 20 }].map(t => (
-                                            <div key={t.n} className="mb-2">
-                                                <span className="text-[7px] block mb-0.5" style={{ color: '#5a4a3a' }}>{t.n}</span>
-                                                <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(168, 144, 112, 0.05)' }}>
-                                                    <div className="h-full rounded-full" style={{ width: `${t.p}%`, background: 'linear-gradient(90deg, #d97218, #e8923c)' }} />
-                                                </div>
-                                            </div>
+                            {/* Chart area */}
+                            <div className="grid grid-cols-3 gap-3">
+                                <div className="col-span-2 bg-white/[0.03] rounded-lg p-4 border border-white/5 h-32">
+                                    {/* Fake chart lines */}
+                                    <div className="h-full flex items-end gap-1.5">
+                                        {[40, 65, 45, 80, 55, 70, 90, 60, 75, 85, 50, 95].map((h, i) => (
+                                            <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: `linear-gradient(to top, rgba(224,112,32,0.4), rgba(224,112,32,0.1))` }}></div>
                                         ))}
                                     </div>
                                 </div>
-                            </div>
-
-                            {/* Right panel — Notifications + Activities */}
-                            <div className="hidden xl:block w-44 flex-shrink-0 pl-3 space-y-4" style={{ borderLeft: '1px solid rgba(168, 144, 112, 0.05)' }}>
-                                <div>
-                                    <span className="text-[10px] font-semibold block mb-2" style={{ color: '#a89888' }}>Notifications</span>
-                                    {[
-                                        { emoji: '🔧', text: 'You fixed a bug.', time: 'Just now' },
-                                        { emoji: '👤', text: 'New user registered.', time: '59 minutes ago' },
-                                        { emoji: '🔧', text: 'You fixed a bug.', time: '12 hours ago' },
-                                        { emoji: '🔔', text: 'Andi Lane subscribed to you.', time: 'Today, 11:59 AM' },
-                                    ].map((n, i) => (
-                                        <div key={i} className="flex items-start gap-1.5 py-1" style={{ borderBottom: '1px solid rgba(168, 144, 112, 0.04)' }}>
-                                            <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 text-[7px]"
-                                                style={{ background: 'rgba(232, 114, 42, 0.08)' }}>{n.emoji}</div>
-                                            <div>
-                                                <div className="text-[8px] font-medium leading-tight" style={{ color: '#b8a890' }}>{n.text}</div>
-                                                <div className="text-[6px]" style={{ color: '#4a3e34' }}>{n.time}</div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <div>
-                                    <span className="text-[10px] font-semibold block mb-2" style={{ color: '#a89888' }}>Activities</span>
-                                    {[
-                                        { c: '#ef4444', text: 'Changed the style.', time: 'Just now' },
-                                        { c: '#3b82f6', text: 'Released a new version.', time: '59 minutes ago' },
-                                        { c: '#22c55e', text: 'Submitted a bug.', time: '12 hours ago' },
-                                    ].map((a, i) => (
-                                        <div key={i} className="flex items-start gap-1.5 py-1" style={{ borderBottom: '1px solid rgba(168, 144, 112, 0.04)' }}>
-                                            <div className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1" style={{ background: a.c }} />
-                                            <div>
-                                                <div className="text-[8px] font-medium leading-tight" style={{ color: '#b8a890' }}>{a.text}</div>
-                                                <div className="text-[6px]" style={{ color: '#4a3e34' }}>{a.time}</div>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="bg-white/[0.03] rounded-lg p-4 border border-white/5 h-32 flex items-center justify-center">
+                                    {/* Fake donut */}
+                                    <div className="w-16 h-16 rounded-full border-4 border-emerald-500/40 border-t-[--color-accent]/60"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </section>
 
-            {/* Spacer for cropped mockup */}
-            <div className="h-28" />
+            {/* ════════ FEATURES ════════ */}
+            <section id="features" className="relative py-24 md:py-32 bg-[--color-bg-secondary]/20">
+                <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
+                    {/* Section header */}
+                    <div className="text-center mb-16 max-w-2xl mx-auto">
+                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                            Complete Agent{' '}
+                            <span className="font-display italic text-[--color-accent]">Visibility</span>
+                        </h2>
+                        <p className="text-[--color-text-secondary] leading-relaxed">
+                            Track performance, cost, and compliance across your entire AI fleet — all in one unified dashboard.
+                        </p>
+                    </div>
 
-            {/* ═══════════════════════════════════════════
-          CTA GALLERY SECTION — replaces analytics cards
-       ═══════════════════════════════════════════ */}
-            <AboutDemo />
+                    {/* Feature cards */}
+                    <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+                        {/* Card 1 */}
+                        <div className="glass-card p-8 rounded-2xl group cursor-default">
+                            <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
+                                <Activity className="w-6 h-6 text-blue-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold mb-2 group-hover:text-blue-400 transition-colors">Real-time Metrics</h3>
+                            <p className="text-[--color-text-muted] text-sm leading-relaxed">
+                                Live monitoring of latency, token usage, and accuracy. Detect drift before it impacts customers.
+                            </p>
+                        </div>
+
+                        {/* Card 2 */}
+                        <div className="glass-card p-8 rounded-2xl group cursor-default">
+                            <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-emerald-500/20 transition-colors">
+                                <BarChart3 className="w-6 h-6 text-emerald-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold mb-2 group-hover:text-emerald-400 transition-colors">Cost Analysis</h3>
+                            <p className="text-[--color-text-muted] text-sm leading-relaxed">
+                                Break down LLM costs by agent and model. Optimize spend with granular usage tracking.
+                            </p>
+                        </div>
+
+                        {/* Card 3 */}
+                        <div className="glass-card p-8 rounded-2xl group cursor-default">
+                            <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-orange-500/20 transition-colors">
+                                <Lock className="w-6 h-6 text-orange-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold mb-2 group-hover:text-orange-400 transition-colors">Audit & Compliance</h3>
+                            <p className="text-[--color-text-muted] text-sm leading-relaxed">
+                                Full trace logs for every decision. Automatic PII detection and bias checks built in.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ════════ FOOTER ════════ */}
+            <footer className="border-t border-white/5 py-12 bg-[--color-bg-primary]">
+                <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-[--color-text-muted]">&copy; 2026 InsureOps AI. Built for the future of insurance.</p>
+                    <div className="flex gap-6 text-sm text-[--color-text-muted]">
+                        <a href="#" className="hover:text-white transition-colors">Privacy</a>
+                        <a href="#" className="hover:text-white transition-colors">Terms</a>
+                        <a href="#" className="hover:text-white transition-colors">Contact</a>
+                    </div>
+                </div>
+            </footer>
         </div>
     );
-}
+};
 
 export default LandingPage;

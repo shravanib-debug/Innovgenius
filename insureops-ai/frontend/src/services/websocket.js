@@ -20,7 +20,7 @@ class WebSocketClient {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = window.location.hostname;
         const port = '5000';
-        const url = `${protocol}//${host}:${port}/ws/dashboard`;
+        const url = `${protocol}//${host}:${port}/ws?channels=dashboard`;
 
         try {
             this.ws = new WebSocket(url);
