@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { RadialBarChart, RadialBar, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 
 const PromptQualityWidget = ({ score = 85, trend = [] }) => {
-    const data = [{ name: 'Quality', value: score, fill: 'var(--color-accent)' }];
+    const data = [{ name: 'Quality', value: score, fill: '#e8722a' }];
 
     // Calculate trend percentage from trend array
     const trendPct = (() => {
@@ -22,14 +23,13 @@ const PromptQualityWidget = ({ score = 85, trend = [] }) => {
     };
 
     return (
-        <div className="glass-card p-6 rounded-xl relative overflow-hidden">
+        <div className="bg-[#1c1815] border border-[#2a201a] rounded-2xl p-6 relative overflow-hidden">
             <div className="flex justify-between items-start mb-2">
-                <h3 className="text-sm font-medium text-[--color-text-secondary] uppercase tracking-wider">Prompt Quality</h3>
+                <h3 className="text-sm font-medium text-[#f1ebe4] uppercase tracking-wider">Prompt Quality</h3>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${trendPct >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
                     {trendPct > 0 ? '+' : ''}{trendPct}%
                 </span>
             </div>
-
             <div className="h-48 relative flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                     <RadialBarChart innerRadius="70%" outerRadius="100%" barSize={10} data={data} startAngle={90} endAngle={-270}>
@@ -37,14 +37,12 @@ const PromptQualityWidget = ({ score = 85, trend = [] }) => {
                         <RadialBar minAngle={15} background clockWise dataKey="value" cornerRadius={10} />
                     </RadialBarChart>
                 </ResponsiveContainer>
-
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl font-bold text-[--color-text-primary]">{score}</span>
-                    <span className="text-sm text-[--color-text-muted] font-medium">{getQualityLabel(score)}</span>
+                    <span className="text-4xl font-bold text-[#f1ebe4]">{score}</span>
+                    <span className="text-sm text-[#a89888] font-medium">{getQualityLabel(score)}</span>
                 </div>
             </div>
-
-            <p className="text-xs text-center text-[--color-text-muted] mt-2">
+            <p className="text-xs text-center text-[#a89888] mt-2">
                 Based on structure, token efficiency, and template adherence.
             </p>
         </div>

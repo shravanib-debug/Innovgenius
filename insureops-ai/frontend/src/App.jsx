@@ -1,33 +1,31 @@
+
 import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
-import DashboardLayout from './components/dashboard/DashboardLayout';
-import OverviewPage from './pages/OverviewPage';
+import AIMonitoringPage from './pages/AIMonitoringPage';
 import Section1Page from './pages/Section1Page';
+import Section2Page from './pages/Section2Page';
+import TracesPage from './pages/TracesPage';
+import AlertsPage from './pages/AlertsPage';
+import AgentConsolePage from './pages/AgentConsolePage';
+import DashboardLayout from './components/layout/DashboardLayout';
+import DashboardPage from './pages/DashboardPage';
 
-// Placeholder pages
-const PlaceholderPage = ({ title }) => (
-  <div className="flex items-center justify-center min-h-[400px]">
-    <div className="text-center">
-      <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>{title}</h2>
-      <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>Coming soon</p>
-    </div>
-  </div>
-);
 
 function App() {
   return (
     <Routes>
-      {/* Landing page */}
       <Route path="/" element={<LandingPage />} />
-
-      {/* Dashboard with sidebar layout */}
       <Route path="/dashboard" element={<DashboardLayout />}>
-        <Route index element={<OverviewPage />} />
+        <Route index element={<DashboardPage />} />
+        <Route path="ai-monitoring" element={<AIMonitoringPage />} />
         <Route path="section1" element={<Section1Page />} />
-        <Route path="section2" element={<PlaceholderPage title="LLM Agent Monitoring" />} />
-        <Route path="traces" element={<PlaceholderPage title="Trace Explorer" />} />
-        <Route path="alerts" element={<PlaceholderPage title="Alerts" />} />
-        <Route path="agents" element={<PlaceholderPage title="Agent Console" />} />
+        <Route path="section2" element={<Section2Page />} />
+        <Route path="traces" element={<TracesPage />} />
+        <Route path="llm-logs" element={<Section2Page />} />
+        <Route path="alerts" element={<AlertsPage />} />
+        <Route path="agents" element={<AgentConsolePage />} />
+        {/* Catch-all for dashboard subpages to demo layout */}
+        <Route path="*" element={<DashboardPage />} />
       </Route>
     </Routes>
   );

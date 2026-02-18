@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -17,22 +18,22 @@ const LatencyWidget = ({ p50 = 0, p95 = 0, p99 = 0, trend = [], slaBreach = fals
     }, [trend]);
 
     return (
-        <div className={`glass-card p-6 rounded-xl ${slaBreach ? 'border border-red-500/30' : ''}`}>
+        <div className={`bg-[#1c1815] border border-[#2a201a] rounded-2xl p-6 ${slaBreach ? 'border-red-500/30' : ''}`}>
             <div className="flex justify-between items-start mb-6">
                 <div>
-                    <h3 className="text-sm font-medium text-[--color-text-secondary] uppercase tracking-wider">Latency (ms)</h3>
+                    <h3 className="text-sm font-medium text-[#f1ebe4] uppercase tracking-wider">Latency (ms)</h3>
                     <div className="flex gap-4 mt-2">
                         <div>
-                            <span className="text-xs text-[--color-text-muted] block">P50</span>
-                            <span className="text-xl font-bold text-[--color-text-primary]">{fmt(p50)}</span>
+                            <span className="text-xs text-[#a89888] block">P50</span>
+                            <span className="text-xl font-bold text-[#f1ebe4]">{fmt(p50)}</span>
                         </div>
                         <div>
-                            <span className="text-xs text-[--color-text-muted] block">P95</span>
-                            <span className={`text-xl font-bold ${slaBreach ? 'text-red-400' : 'text-[--color-text-primary]'}`}>{fmt(p95)}</span>
+                            <span className="text-xs text-[#a89888] block">P95</span>
+                            <span className={`text-xl font-bold ${slaBreach ? 'text-red-400' : 'text-[#f1ebe4]'}`}>{fmt(p95)}</span>
                         </div>
                         <div>
-                            <span className="text-xs text-[--color-text-muted] block">P99</span>
-                            <span className="text-xl font-bold text-[--color-text-primary]">{fmt(p99)}</span>
+                            <span className="text-xs text-[#a89888] block">P99</span>
+                            <span className="text-xl font-bold text-[#f1ebe4]">{fmt(p99)}</span>
                         </div>
                     </div>
                 </div>
@@ -42,7 +43,6 @@ const LatencyWidget = ({ p50 = 0, p95 = 0, p99 = 0, trend = [], slaBreach = fals
                     </span>
                 )}
             </div>
-
             <div className="h-40 w-full">
                 {chartData.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
@@ -64,7 +64,7 @@ const LatencyWidget = ({ p50 = 0, p95 = 0, p99 = 0, trend = [], slaBreach = fals
                         </AreaChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="h-full flex items-center justify-center text-sm text-[--color-text-muted]">
+                    <div className="h-full flex items-center justify-center text-sm text-[#a89888]">
                         No trend data available
                     </div>
                 )}

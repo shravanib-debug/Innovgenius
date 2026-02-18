@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -22,19 +23,17 @@ const CostTrackerWidget = ({ total = 0, byAgent = {}, trend = [], avgPerRequest 
     }, [byAgent]);
 
     return (
-        <div className="glass-card p-6 rounded-xl">
+        <div className="bg-[#1c1815] border border-[#2a201a] rounded-2xl p-6">
             <div className="flex justify-between items-start mb-4">
-                <h3 className="text-sm font-medium text-[--color-text-secondary] uppercase tracking-wider">Est. Daily Cost</h3>
-                <span className="text-xs bg-white/5 px-2 py-1 rounded text-[--color-text-muted]">Budget: ${budget}/day</span>
+                <h3 className="text-sm font-medium text-[#f1ebe4] uppercase tracking-wider">Est. Daily Cost</h3>
+                <span className="text-xs bg-white/5 px-2 py-1 rounded text-[#a89888]">Budget: ${budget}/day</span>
             </div>
-
             <div className="mb-6">
                 <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-bold text-[--color-text-primary]">${total.toFixed(2)}</span>
-                    <span className="text-sm text-[--color-text-muted]">USD</span>
+                    <span className="text-3xl font-bold text-[#f1ebe4]">${total.toFixed(2)}</span>
+                    <span className="text-sm text-[#a89888]">USD</span>
                 </div>
-                <p className="text-xs text-[--color-text-muted] mt-1">Avg ${avgPerRequest.toFixed(4)}/request</p>
-
+                <p className="text-xs text-[#a89888] mt-1">Avg ${avgPerRequest.toFixed(4)}/request</p>
                 {/* Progress bar */}
                 <div className="mt-3 w-full bg-slate-700/30 rounded-full h-2 overflow-hidden">
                     <div
@@ -42,9 +41,8 @@ const CostTrackerWidget = ({ total = 0, byAgent = {}, trend = [], avgPerRequest 
                         style={{ width: `${Math.min(percentUsed, 100)}%` }}
                     ></div>
                 </div>
-                <p className="text-xs text-[--color-text-muted] mt-1 text-right">{percentUsed.toFixed(0)}% of daily budget</p>
+                <p className="text-xs text-[#a89888] mt-1 text-right">{percentUsed.toFixed(0)}% of daily budget</p>
             </div>
-
             <div className="h-32 w-full">
                 {agentChart.length > 0 ? (
                     <ResponsiveContainer width="100%" height="100%">
@@ -63,7 +61,7 @@ const CostTrackerWidget = ({ total = 0, byAgent = {}, trend = [], avgPerRequest 
                         </BarChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className="h-full flex items-center justify-center text-sm text-[--color-text-muted]">
+                    <div className="h-full flex items-center justify-center text-sm text-[#a89888]">
                         No cost data available
                     </div>
                 )}

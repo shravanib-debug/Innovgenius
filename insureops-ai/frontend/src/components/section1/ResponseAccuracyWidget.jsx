@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 
@@ -22,11 +23,11 @@ const ResponseAccuracyWidget = ({ byAgent = {}, overall = 0 }) => {
     const overallTrend = overall > 0 ? (overall - 80).toFixed(1) : '0.0';
 
     return (
-        <div className="glass-card p-6 rounded-xl col-span-2">
+        <div className="bg-[#1c1815] border border-[#2a201a] rounded-2xl p-6 col-span-2">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h3 className="text-sm font-medium text-[--color-text-secondary] uppercase tracking-wider">Response Accuracy</h3>
-                    <p className="text-2xl font-bold text-[--color-text-primary] mt-1">
+                    <h3 className="text-sm font-medium text-[#f1ebe4] uppercase tracking-wider">Response Accuracy</h3>
+                    <p className="text-2xl font-bold text-[#f1ebe4] mt-1">
                         {overall}%
                         <span className={`text-sm font-normal ml-2 ${parseFloat(overallTrend) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                             {parseFloat(overallTrend) >= 0 ? '↑' : '↓'} {Math.abs(parseFloat(overallTrend))}% vs baseline
@@ -34,10 +35,9 @@ const ResponseAccuracyWidget = ({ byAgent = {}, overall = 0 }) => {
                     </p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 text-xs bg-white/5 rounded border border-white/10 text-[--color-text-muted]">Per Agent</span>
+                    <span className="px-2 py-1 text-xs bg-white/5 rounded border border-white/10 text-[#a89888]">Per Agent</span>
                 </div>
             </div>
-
             <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} layout="vertical" barSize={24}>

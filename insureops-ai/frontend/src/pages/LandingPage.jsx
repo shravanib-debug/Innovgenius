@@ -1,218 +1,389 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, ChevronRight, Activity, BarChart3, Lock, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Play } from 'lucide-react';
+import { ContainerScroll } from '../components/ui/container-scroll-animation';
 
-const LandingPage = () => {
+/* ─── 4-pointed pinwheel / origami star ─── */
+const PinwheelStar = ({ size = 48, style = {} }) => (
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={style}>
+        <polygon points="32,4 38,28 26,28" fill="#f97316" />
+        <polygon points="60,32 36,26 36,38" fill="#ef4444" />
+        <polygon points="32,60 26,36 38,36" fill="#dc2626" />
+        <polygon points="4,32 28,38 28,26" fill="#fbbf24" />
+    </svg>
+);
+
+/* ─── Asterisk logo SVG ─── */
+const LogoIcon = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <line x1="12" y1="1" x2="12" y2="23" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
+        <line x1="1" y1="12" x2="23" y2="12" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
+        <line x1="4.2" y1="4.2" x2="19.8" y2="19.8" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
+        <line x1="19.8" y1="4.2" x2="4.2" y2="19.8" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="12" cy="12" r="2.5" fill="#f97316" />
+    </svg>
+);
+
+/* ─── Sparkle star beside the script word ─── */
+const SparkleIcon = ({ size = 20 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="inline-block ml-1">
+        <path
+            d="M12 2L14 9L21 9L15.5 13.5L17.5 21L12 16.5L6.5 21L8.5 13.5L3 9L10 9L12 2Z"
+            fill="url(#sparkleGrad)"
+        />
+        <defs>
+            <linearGradient id="sparkleGrad" x1="0" y1="0" x2="24" y2="24">
+                <stop offset="0%" stopColor="#f97316" />
+                <stop offset="100%" stopColor="#fbbf24" />
+            </linearGradient>
+        </defs>
+    </svg>
+);
+
+function LandingPage() {
+    const [hoveredLink, setHoveredLink] = useState(null);
+    const [scrolled, setScrolled] = useState(false);
+
+    React.useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 10);
+        window.addEventListener('scroll', onScroll);
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
     return (
-        <div className="min-h-screen bg-[--color-bg-primary] text-[--color-text-primary] font-sans overflow-x-hidden selection:bg-[--color-accent]/30 selection:text-white">
+        <div className="min-h-screen relative overflow-hidden bg-[#060504] font-sans">
 
-            {/* ════════ NAVBAR ════════ */}
-            <nav className="fixed w-full z-50 top-0 bg-transparent">
-                <div className="max-w-7xl mx-auto flex items-center justify-between px-6 md:px-12 lg:px-20 py-5">
-                    {/* Logo */}
-                    <Link to="/" className="flex items-center gap-2.5 group">
-                        <div className="w-8 h-8 bg-gradient-to-br from-[--color-accent] to-amber-700 rounded-lg flex items-center justify-center group-hover:shadow-lg group-hover:shadow-[--color-accent]/20 transition-shadow">
-                            <Shield className="w-4 h-4 text-white" />
+            {/* ═══════════════════════════════════════════
+          BACKGROUND — Warm golden curtain glow
+       ═══════════════════════════════════════════ */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                {[
+                    { left: '8%', opacity: 0.04 },
+                    { left: '13%', opacity: 0.05 },
+                    { left: '18%', opacity: 0.06 },
+                    { left: '23%', opacity: 0.07 },
+                    { left: '28%', opacity: 0.08 },
+                    { left: '33%', opacity: 0.10 },
+                    { left: '37%', opacity: 0.12 },
+                    { left: '41%', opacity: 0.14 },
+                    { left: '45%', opacity: 0.16 },
+                    { left: '48%', opacity: 0.18 },
+                    { left: '50%', opacity: 0.18 },
+                    { left: '52%', opacity: 0.18 },
+                    { left: '55%', opacity: 0.16 },
+                    { left: '59%', opacity: 0.14 },
+                    { left: '63%', opacity: 0.12 },
+                    { left: '67%', opacity: 0.10 },
+                    { left: '72%', opacity: 0.08 },
+                    { left: '77%', opacity: 0.07 },
+                    { left: '82%', opacity: 0.06 },
+                    { left: '87%', opacity: 0.05 },
+                    { left: '92%', opacity: 0.04 },
+                ].map((line, i) => (
+                    <div
+                        key={i}
+                        className="absolute top-0 h-full"
+                        style={{
+                            left: line.left,
+                            width: i % 2 === 0 ? '1px' : '2px',
+                            opacity: line.opacity,
+                            background: 'linear-gradient(180deg, rgba(180, 120, 60, 0.6) 0%, rgba(140, 90, 40, 0.4) 30%, rgba(100, 60, 20, 0.15) 60%, transparent 85%)',
+                            maskImage: 'linear-gradient(to bottom, black 0%, black 35%, transparent 80%)',
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 35%, transparent 80%)',
+                        }}
+                    />
+                ))}
+                <div className="absolute left-1/2 -translate-x-1/2 top-20 w-[900px] h-[500px] bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(200,80,0,0.7)_0%,rgba(160,60,0,0.35)_30%,rgba(120,40,0,0.12)_55%,transparent_75%)]" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-[110px] w-[500px] h-[350px] bg-[radial-gradient(ellipse_70%_50%_at_50%_35%,rgba(240,130,30,0.45)_0%,rgba(200,80,0,0.15)_50%,transparent_75%)]" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1200px] h-[350px] rounded-full opacity-15 blur-[100px] bg-[radial-gradient(circle,#c06818_0%,#7a3a10_40%,transparent_70%)]" />
+            </div>
+
+            {/* ═══════════════════════════════════════════
+          NAVBAR — Premium, animated, glassy
+       ═══════════════════════════════════════════ */}
+            <motion.nav
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6 }}
+                className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 lg:px-16 xl:px-24 py-5 md:py-6
+                    bg-black/60 backdrop-blur-xl
+                    ${scrolled ? 'shadow-[0_4px_32px_0_rgba(232,114,42,0.10)]' : ''}
+                    transition-shadow duration-300 ease-in-out`}
+                style={{
+                    borderBottom: scrolled ? '1.5px solid rgba(232,114,42,0.10)' : '1.5px solid transparent',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                }}
+            >
+                <Link to="/" className="flex items-center gap-2.5 no-underline group">
+                    <LogoIcon />
+                    <span className="text-lg font-semibold tracking-tight text-white font-sans group-hover:text-amber-400 transition-colors duration-300 ease-in-out">Savio</span>
+                </Link>
+                <div className="hidden md:flex items-center gap-2 lg:gap-4 xl:gap-6">
+                    {['Home', 'Pricing', 'Features', 'Resources', 'About'].map((item, idx) => (
+                        <motion.button
+                            key={item}
+                            onMouseEnter={() => setHoveredLink(item)}
+                            onMouseLeave={() => setHoveredLink(null)}
+                            className={`relative px-4 py-2 rounded-lg font-medium text-sm
+                                transition-all duration-300 ease-in-out
+                                text-white/80 hover:text-amber-300
+                                focus:outline-none
+                                bg-white/5 hover:bg-amber-400/10
+                                backdrop-blur-[2px]
+                                overflow-hidden
+                                flex items-center
+                                ${hoveredLink === item ? 'scale-105 shadow-[0_0_16px_0_rgba(232,180,42,0.18)]' : ''}`}
+                            whileHover={{ scale: 1.08 }}
+                        >
+                            <span className="relative z-10">{item}</span>
+                            {/* Underline animation */}
+                            <motion.span
+                                layoutId="nav-underline"
+                                className="absolute left-3 right-3 bottom-1 h-0.5 rounded-full"
+                                style={{
+                                    background: 'linear-gradient(90deg, #fbbf24 0%, #e8722a 100%)',
+                                    boxShadow: hoveredLink === item ? '0 0 8px 2px #fbbf24aa' : 'none',
+                                    opacity: hoveredLink === item ? 1 : 0,
+                                }}
+                                initial={false}
+                                animate={{ opacity: hoveredLink === item ? 1 : 0, y: hoveredLink === item ? 0 : 8 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 30, duration: 0.3 }}
+                            />
+                            {/* Glowing dot for active/hovered */}
+                            <motion.span
+                                className="absolute left-1/2 -translate-x-1/2 bottom-0 w-2 h-2 rounded-full"
+                                style={{
+                                    background: hoveredLink === item ? 'radial-gradient(circle, #fbbf24 60%, transparent 100%)' : 'transparent',
+                                    opacity: hoveredLink === item ? 1 : 0,
+                                }}
+                                initial={false}
+                                animate={{ opacity: hoveredLink === item ? 1 : 0, scale: hoveredLink === item ? 1 : 0.7 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 30, duration: 0.3 }}
+                            />
+                        </motion.button>
+                    ))}
+                </div>
+                <Link
+                    to="/dashboard"
+                    className="hidden md:flex items-center justify-center rounded-full text-sm font-semibold px-7 py-2.5
+                        bg-gradient-to-br from-amber-500/80 to-orange-700/80 text-white shadow-[0_2px_24px_0_rgba(232,114,42,0.18)]
+                        border border-amber-400/20 hover:shadow-[0_0_32px_0_rgba(232,180,42,0.25)]
+                        hover:from-amber-400 hover:to-orange-500
+                        transition-all duration-300 ease-in-out focus:outline-none"
+                    style={{ letterSpacing: '0.01em' }}
+                >
+                    Get Started
+                </Link>
+            </motion.nav>
+
+
+            {/* ═══════════════════════════════════════════
+          SCROLL CONTAINER HERO
+       ═══════════════════════════════════════════ */}
+            <div className="flex flex-col items-center relative z-20">
+                <ContainerScroll
+                    titleComponent={
+                        <div className="flex flex-col items-center justify-center text-center px-4 w-full space-y-2 mt-20">
+
+
+                            {/* Announcement badge */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                                className="flex items-center gap-2 px-5 py-2 rounded-full mb-8 text-[13px] font-normal tracking-wide bg-[rgba(200,120,40,0.06)] border border-[rgba(200,120,40,0.2)] text-[rgba(220,160,80,0.85)]"
+                            >
+                                <span style={{ fontSize: '12px' }}>✦</span>
+                                New plans available. Learn More
+                            </motion.div>
+
+                            {/* Headline */}
+                            <motion.h1
+                                initial={{ y: 30, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.7, delay: 0.3 }}
+                                className="text-[3.5rem] sm:text-[4.5rem] lg:text-[6rem] font-semibold leading-[1.1] tracking-[-0.02em] max-w-5xl mb-6 text-[#f1ebe4]"
+                            >
+                                Take Control Of Your <br />
+                                <span className="italic font-normal font-serif bg-gradient-to-br from-orange-500 to-amber-300 bg-clip-text text-transparent">
+                                    Financial Growth
+                                </span>
+                                <SparkleIcon size={40} />
+                            </motion.h1>
+
+                            {/* Subtitle */}
+                            <motion.p
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.6, delay: 0.5 }}
+                                className="text-lg text-[rgba(168,152,136,0.8)] max-w-2xl mb-16 leading-relaxed"
+                            >
+                                AI-powered money management that helps you grow savings without changing your lifestyle.
+                            </motion.p>
+
+                            {/* CTA Buttons — BIGGER */}
+                            <motion.div
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 0.6, delay: 0.6 }}
+                                className="flex items-center justify-center gap-6 mb-28"
+                            >
+                                <Link
+                                    to="/dashboard"
+                                    className="flex items-center justify-center gap-2 px-10 py-5 rounded-full text-xl font-bold text-white bg-gradient-to-br from-orange-500 to-orange-700 hover:shadow-[0_0_50px_rgba(249,115,22,0.6)] hover:-translate-y-1 transition-all duration-300 min-w-[240px]"
+                                >
+                                    Start Saving Today
+                                </Link>
+
+                                <a
+                                    href="#demo"
+                                    className="flex items-center justify-center gap-2 px-10 py-5 rounded-full text-xl font-medium text-[#f1ebe4] bg-white/5 border border-white/20 hover:bg-white/10 transition-all duration-300 min-w-[220px]"
+                                >
+                                    <Play size={20} fill="currentColor" className="opacity-80" />
+                                    Watch Demo
+                                </a>
+                            </motion.div>
                         </div>
-                        <span className="text-lg font-semibold tracking-tight">
-                            InsureOps <span className="text-[--color-accent]">AI</span>
-                        </span>
-                    </Link>
-
-                    {/* Center Nav */}
-                    <div className="hidden md:flex items-center gap-8">
-                        <a href="#" className="nav-link">Home</a>
-                        <a href="#features" className="nav-link">Features</a>
-                        <a href="#" className="nav-link">Pricing</a>
-                        <a href="#" className="nav-link">Resources</a>
-                        <a href="#" className="nav-link">About</a>
-                    </div>
-
-                    {/* CTA */}
-                    <Link
-                        to="/dashboard"
-                        className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium border border-white/20 rounded-full text-[--color-text-secondary] hover:text-white hover:border-white/40 transition-all"
-                    >
-                        Get Started <ChevronRight className="w-3.5 h-3.5" />
-                    </Link>
-                </div>
-            </nav>
-
-            {/* ════════ HERO SECTION ════════ */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-
-                {/* ── Background layers ── */}
-                {/* Warm amber streaks (stage curtain feel) */}
-                <div className="absolute inset-0 hero-ambient-streaks"></div>
-
-                {/* Bottom-center radial glow */}
-                <div className="absolute inset-0 hero-glow"></div>
-
-                {/* Decorative blobs */}
-                <div className="deco-blob-1" style={{ left: '-5%', top: '35%' }}></div>
-                <div className="deco-blob-2" style={{ right: '-3%', bottom: '10%' }}></div>
-
-                {/* ── Content ── */}
-                <div className="relative z-10 text-center px-6 md:px-12 lg:px-20 max-w-[900px] mx-auto pt-24 pb-8">
-
-                    {/* Announcement badge */}
-                    <div className="animate-fade-in-up">
-                        <span className="badge-pill">
-                            <Sparkles className="w-3.5 h-3.5 text-[--color-accent]" />
-                            Now in Public Beta — v1.0
-                        </span>
-                    </div>
-
-                    {/* Headline */}
-                    <h1 className="mt-8 text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.08] animate-fade-in-up delay-100">
-                        <span className="bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/60">
-                            AI Observability for
-                        </span>
-                        <br />
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-[--color-accent] via-amber-400 to-[--color-accent]">
-                            Smart{' '}
-                        </span>
-                        <span className="font-display italic bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-[--color-accent]">
-                            Insurance
-                        </span>
-                    </h1>
-
-                    {/* Subtitle */}
-                    <p className="mt-6 text-base md:text-lg text-[--color-text-secondary] max-w-xl mx-auto leading-relaxed animate-fade-in-up delay-200" style={{ opacity: 0.65 }}>
-                        Monitor, audit, and trust your AI agents. From claims processing to underwriting, gain complete visibility into every decision.
-                    </p>
-
-                    {/* CTA Buttons */}
-                    <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up delay-300">
-                        <Link to="/dashboard" className="btn-primary">
-                            Launch Dashboard <ChevronRight className="w-4 h-4" />
-                        </Link>
-                        <a href="#features" className="btn-secondary">
-                            Learn More
-                        </a>
-                    </div>
-                </div>
-
-                {/* ── Floating Dashboard Preview ── */}
-                <div className="relative z-10 w-full max-w-5xl mx-auto px-6 md:px-12 mt-4 mb-[-40px] animate-fade-in-up delay-400">
-                    <div className="dashboard-preview">
-                        {/* Mock Dashboard UI */}
-                        <div className="bg-[#0e0e0e] p-4 md:p-6">
-                            {/* Top bar */}
-                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-3 h-3 rounded-full bg-red-500/70"></div>
-                                    <div className="w-3 h-3 rounded-full bg-yellow-500/70"></div>
-                                    <div className="w-3 h-3 rounded-full bg-green-500/70"></div>
+                    }
+                >
+                    {/* ─── DASHBOARD MOCKUP (Children of Scroll Card) ─── */}
+                    <div className="w-full h-full rounded-2xl overflow-hidden bg-gradient-to-b from-[#191512] to-[#110f0c] relative">
+                        {/* Mockup Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-[#a89070]/10">
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-[#e8722a] to-[#f2923c]">
+                                        <span className="text-xs text-white font-bold">✦</span>
+                                    </div>
+                                    <span className="text-sm font-bold text-[#a89888]">Savio</span>
                                 </div>
-                                <div className="h-6 w-48 bg-white/5 rounded-md"></div>
+                                <div className="hidden sm:flex items-center gap-3 ml-4 text-xs text-[#5a4a3a]">
+                                    <span className="font-medium text-[#7a6550]">Dashboards</span>
+                                    <span>/</span>
+                                    <span>Default</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="w-48 h-8 rounded-lg bg-[#a89070]/5 border border-[#a89070]/10 flex items-center px-3 text-xs text-[#5a4a3a]">
+                                    Search...
+                                </div>
                                 <div className="flex gap-2">
-                                    <div className="h-6 w-16 bg-white/5 rounded-md"></div>
-                                    <div className="h-6 w-16 bg-[--color-accent]/20 rounded-md"></div>
+                                    {[1, 2, 3].map(i => <div key={i} className="w-8 h-8 rounded-full bg-[#a89070]/5" />)}
                                 </div>
                             </div>
-                            {/* Dashboard content grid */}
-                            <div className="grid grid-cols-4 gap-3 mb-4">
-                                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
-                                    <div className="h-2 w-16 bg-white/10 rounded mb-2"></div>
-                                    <div className="h-5 w-12 bg-[--color-accent]/30 rounded"></div>
-                                </div>
-                                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
-                                    <div className="h-2 w-20 bg-white/10 rounded mb-2"></div>
-                                    <div className="h-5 w-10 bg-emerald-500/30 rounded"></div>
-                                </div>
-                                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
-                                    <div className="h-2 w-14 bg-white/10 rounded mb-2"></div>
-                                    <div className="h-5 w-14 bg-blue-500/30 rounded"></div>
-                                </div>
-                                <div className="bg-white/[0.03] rounded-lg p-3 border border-white/5">
-                                    <div className="h-2 w-18 bg-white/10 rounded mb-2"></div>
-                                    <div className="h-5 w-8 bg-amber-500/30 rounded"></div>
-                                </div>
+                        </div>
+
+                        {/* Mockup Body */}
+                        <div className="flex h-full p-6 gap-6">
+                            {/* Sidebar Mock */}
+                            <div className="w-56 hidden lg:block space-y-6">
+                                {[
+                                    { t: 'Favorites', i: ['Overview', 'Projects'] },
+                                    { t: 'Dashboards', i: ['Overview', 'eCommerce', 'Projects'], active: 0 },
+                                ].map((s, idx) => (
+                                    <div key={idx}>
+                                        <div className="text-[10px] uppercase tracking-widest text-[#4a3e34] font-bold mb-3 pl-2">{s.t}</div>
+                                        {s.i.map((item, ii) => (
+                                            <div key={item} className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium ${s.active === ii ? 'bg-[#e8722a]/10 text-[#d4944a]' : 'text-[#5a4a3a]'}`}>
+                                                <div className={`w-2 h-2 rounded-sm ${s.active === ii ? 'bg-[#e8722a]' : 'bg-[#a89070]/20'}`} />
+                                                {item}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
                             </div>
-                            {/* Chart area */}
-                            <div className="grid grid-cols-3 gap-3">
-                                <div className="col-span-2 bg-white/[0.03] rounded-lg p-4 border border-white/5 h-32">
-                                    {/* Fake chart lines */}
-                                    <div className="h-full flex items-end gap-1.5">
-                                        {[40, 65, 45, 80, 55, 70, 90, 60, 75, 85, 50, 95].map((h, i) => (
-                                            <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, background: `linear-gradient(to top, rgba(224,112,32,0.4), rgba(224,112,32,0.1))` }}></div>
+
+                            {/* Main Content Mock */}
+                            <div className="flex-1 space-y-6">
+                                <div className="flex justify-between items-center">
+                                    <h2 className="text-xl font-bold text-[#d5c4a1]">Overview</h2>
+                                    <div className="text-xs text-[#7a6550]">Today ▾</div>
+                                </div>
+
+                                <div className="grid grid-cols-4 gap-4">
+                                    {[
+                                        { l: 'Views', v: '7,265', c: '+11%', up: true },
+                                        { l: 'Visits', v: '3,671', c: '-0.03%', up: false },
+                                        { l: 'New Users', v: '256', c: '+15%', up: true },
+                                        { l: 'Active', v: '2,318', c: '+6%', up: true },
+                                    ].map(card => (
+                                        <div key={card.l} className="p-4 rounded-xl bg-[#a89070]/5 border border-[#a89070]/10">
+                                            <div className="text-[10px] uppercase tracking-wider text-[#5a4a3a] mb-2">{card.l}</div>
+                                            <div className="flex justify-between items-baseline">
+                                                <div className="text-2xl font-bold text-[#e8ddd0]">{card.v}</div>
+                                                <div className={`text-[10px] ${card.up ? 'text-green-500' : 'text-red-500'}`}>{card.c}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="grid grid-cols-3 gap-6 h-64">
+                                    <div className="col-span-2 rounded-xl bg-[#a89070]/5 border border-[#a89070]/10 p-4 relative overflow-hidden">
+                                        <div className="absolute inset-0 flex items-end">
+                                            <svg viewBox="0 0 400 100" className="w-full h-3/4 opacity-50" preserveAspectRatio="none">
+                                                <path d="M0,80 C100,60 200,90 400,20 L400,100 L0,100 Z" fill="url(#grad)" />
+                                                <path d="M0,80 C100,60 200,90 400,20" fill="none" stroke="#e8722a" strokeWidth="2" />
+                                                <defs>
+                                                    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="0%" stopColor="#e8722a" stopOpacity="0.4" />
+                                                        <stop offset="100%" stopColor="#e8722a" stopOpacity="0" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div className="rounded-xl bg-[#a89070]/5 border border-[#a89070]/10 p-4">
+                                        <div className="text-xs font-bold text-[#a89888] mb-4">Traffic Channel</div>
+                                        {['Google', 'YouTube', 'Instagram'].map((ch, i) => (
+                                            <div key={ch} className="mb-3">
+                                                <div className="flex justify-between text-[10px] text-[#5a4a3a] mb-1"><span>{ch}</span><span>{80 - i * 20}%</span></div>
+                                                <div className="h-1.5 bg-[#a89070]/10 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-gradient-to-r from-[#d97218] to-[#e8923c]" style={{ width: `${80 - i * 20}%` }} />
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="bg-white/[0.03] rounded-lg p-4 border border-white/5 h-32 flex items-center justify-center">
-                                    {/* Fake donut */}
-                                    <div className="w-16 h-16 rounded-full border-4 border-emerald-500/40 border-t-[--color-accent]/60"></div>
-                                </div>
+                            </div>
+
+                            {/* Rightbar Mock */}
+                            <div className="w-48 hidden xl:block space-y-4 border-l border-[#a89070]/5 pl-4">
+                                <div className="text-[10px] uppercase font-bold text-[#a89888] mb-2">Notifications</div>
+                                {[1, 2, 3].map(i => (
+                                    <div key={i} className="flex gap-2 items-start py-2 border-b border-[#a89070]/5">
+                                        <div className="w-6 h-6 rounded-full bg-[#e8722a]/10 flex items-center justify-center text-[10px]">🔔</div>
+                                        <div>
+                                            <div className="text-[10px] text-[#b8a890] font-medium leading-tight">New update available</div>
+                                            <div className="text-[8px] text-[#4a3e34]">2m ago</div>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </ContainerScroll>
+            </div>
 
-            {/* ════════ FEATURES ════════ */}
-            <section id="features" className="relative py-24 md:py-32 bg-[--color-bg-secondary]/20">
-                <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20">
-                    {/* Section header */}
-                    <div className="text-center mb-16 max-w-2xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                            Complete Agent{' '}
-                            <span className="font-display italic text-[--color-accent]">Visibility</span>
-                        </h2>
-                        <p className="text-[--color-text-secondary] leading-relaxed">
-                            Track performance, cost, and compliance across your entire AI fleet — all in one unified dashboard.
-                        </p>
-                    </div>
+            {/* ═══════════════════════════════════════════
+          DECORATIVE STARS (Floating)
+       ═══════════════════════════════════════════ */}
+            <motion.div
+                className="absolute z-10 top-[20%] left-[5%]"
+                animate={{ y: [-10, 10, -10], rotate: [0, 10, 0] }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            >
+                <PinwheelStar size={64} />
+            </motion.div>
+            <motion.div
+                className="absolute z-10 bottom-[20%] right-[8%]"
+                animate={{ y: [10, -10, 10], rotate: [0, -15, 0] }}
+                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+            >
+                <PinwheelStar size={80} style={{ transform: 'rotate(20deg)' }} />
+            </motion.div>
 
-                    {/* Feature cards */}
-                    <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-                        {/* Card 1 */}
-                        <div className="glass-card p-8 rounded-2xl group cursor-default">
-                            <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500/20 transition-colors">
-                                <Activity className="w-6 h-6 text-blue-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2 group-hover:text-blue-400 transition-colors">Real-time Metrics</h3>
-                            <p className="text-[--color-text-muted] text-sm leading-relaxed">
-                                Live monitoring of latency, token usage, and accuracy. Detect drift before it impacts customers.
-                            </p>
-                        </div>
-
-                        {/* Card 2 */}
-                        <div className="glass-card p-8 rounded-2xl group cursor-default">
-                            <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-emerald-500/20 transition-colors">
-                                <BarChart3 className="w-6 h-6 text-emerald-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2 group-hover:text-emerald-400 transition-colors">Cost Analysis</h3>
-                            <p className="text-[--color-text-muted] text-sm leading-relaxed">
-                                Break down LLM costs by agent and model. Optimize spend with granular usage tracking.
-                            </p>
-                        </div>
-
-                        {/* Card 3 */}
-                        <div className="glass-card p-8 rounded-2xl group cursor-default">
-                            <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-orange-500/20 transition-colors">
-                                <Lock className="w-6 h-6 text-orange-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2 group-hover:text-orange-400 transition-colors">Audit & Compliance</h3>
-                            <p className="text-[--color-text-muted] text-sm leading-relaxed">
-                                Full trace logs for every decision. Automatic PII detection and bias checks built in.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* ════════ FOOTER ════════ */}
-            <footer className="border-t border-white/5 py-12 bg-[--color-bg-primary]">
-                <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-20 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <p className="text-sm text-[--color-text-muted]">&copy; 2026 InsureOps AI. Built for the future of insurance.</p>
-                    <div className="flex gap-6 text-sm text-[--color-text-muted]">
-                        <a href="#" className="hover:text-white transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-white transition-colors">Terms</a>
-                        <a href="#" className="hover:text-white transition-colors">Contact</a>
-                    </div>
-                </div>
-            </footer>
         </div>
     );
 };

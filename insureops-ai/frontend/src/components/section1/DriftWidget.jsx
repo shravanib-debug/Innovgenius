@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
@@ -18,22 +19,20 @@ const DriftWidget = ({ score = 0.05, status = 'normal' }) => {
     const isWarning = status !== 'normal';
 
     return (
-        <div className="glass-card p-6 rounded-xl">
+        <div className="bg-[#1c1815] border border-[#2a201a] rounded-2xl p-6">
             <div className="flex justify-between items-start mb-4">
-                <h3 className="text-sm font-medium text-[--color-text-secondary] uppercase tracking-wider">Model Drift</h3>
+                <h3 className="text-sm font-medium text-[#f1ebe4] uppercase tracking-wider">Model Drift</h3>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${!isWarning ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
                     {!isWarning ? 'Healthy' : 'Drift Detected'}
                 </span>
             </div>
-
             <div className="flex items-end justify-between mb-4">
                 <div>
-                    <span className="text-[--color-text-muted] text-xs">Drift Score (KL Div)</span>
-                    <p className={`text-2xl font-bold ${isWarning ? 'text-red-400' : 'text-[--color-text-primary]'}`}>{score}</p>
+                    <span className="text-[#a89888] text-xs">Drift Score (KL Div)</span>
+                    <p className={`text-2xl font-bold ${isWarning ? 'text-red-400' : 'text-[#f1ebe4]'}`}>{score}</p>
                 </div>
-                <span className="text-xs text-[--color-text-muted]">Threshold: 0.3</span>
+                <span className="text-xs text-[#a89888]">Threshold: 0.3</span>
             </div>
-
             <div className="h-32 w-full relative">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart>
@@ -47,13 +46,12 @@ const DriftWidget = ({ score = 0.05, status = 'normal' }) => {
                         </defs>
                     </AreaChart>
                 </ResponsiveContainer>
-                <div className="absolute top-0 right-0 p-2 text-xs text-[--color-text-muted]">
+                <div className="absolute top-0 right-0 p-2 text-xs text-[#a89888]">
                     <span className="inline-block w-2 h-2 bg-slate-500/50 mr-1 rounded-full"></span> Baseline
-                    <span className={`inline-block w-2 h-2 ml-2 mr-1 rounded-full ${isWarning ? 'bg-red-400' : 'bg-[--color-accent]'}`}></span> Current
+                    <span className={`inline-block w-2 h-2 ml-2 mr-1 rounded-full ${isWarning ? 'bg-red-400' : 'bg-orange-400'}`}></span> Current
                 </div>
             </div>
-
-            <p className="text-xs text-[--color-text-muted] mt-2">
+            <p className="text-xs text-[#a89888] mt-2">
                 Output distribution comparison. Higher score indicates significant deviation from training/baseline data.
             </p>
         </div>

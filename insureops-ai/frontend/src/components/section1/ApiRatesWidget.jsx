@@ -1,3 +1,4 @@
+
 import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -17,11 +18,10 @@ const ApiRatesWidget = ({ success = 0, failure = 0, successRate = 100 }) => {
     }, [success, failure, total]);
 
     return (
-        <div className="glass-card p-6 rounded-xl">
+        <div className="bg-[#1c1815] border border-[#2a201a] rounded-2xl p-6">
             <div className="flex justify-between items-start mb-4">
-                <h3 className="text-sm font-medium text-[--color-text-secondary] uppercase tracking-wider">API Health</h3>
+                <h3 className="text-sm font-medium text-[#f1ebe4] uppercase tracking-wider">API Health</h3>
             </div>
-
             <div className="flex items-center gap-6">
                 <div className="h-32 w-32 relative">
                     <ResponsiveContainer width="100%" height="100%">
@@ -48,31 +48,30 @@ const ApiRatesWidget = ({ success = 0, failure = 0, successRate = 100 }) => {
                         </PieChart>
                     </ResponsiveContainer>
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="text-lg font-bold text-[--color-text-primary]">{successRate}%</span>
+                        <span className="text-lg font-bold text-[#f1ebe4]">{successRate}%</span>
                     </div>
                 </div>
-
                 <div className="flex-1 space-y-3">
                     <div className="flex justify-between items-center text-sm">
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                            <span className="text-[--color-text-secondary]">Success</span>
+                            <span className="text-[#a89888]">Success</span>
                         </div>
-                        <span className="font-semibold text-[--color-text-primary]">{success.toLocaleString()}</span>
+                        <span className="font-semibold text-[#f1ebe4]">{success.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between items-center text-sm">
                         <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                            <span className="text-[--color-text-secondary]">Failure</span>
+                            <span className="text-[#a89888]">Failure</span>
                         </div>
-                        <span className="font-semibold text-[--color-text-primary]">{failure.toLocaleString()}</span>
+                        <span className="font-semibold text-[#f1ebe4]">{failure.toLocaleString()}</span>
                     </div>
                     <div className="pt-2 border-t border-white/5">
-                        <div className="flex justify-between text-xs text-[--color-text-muted]">
+                        <div className="flex justify-between text-xs text-[#a89888]">
                             <span>Total Requests</span>
                             <span>{total.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between text-xs text-[--color-text-muted] mt-1">
+                        <div className="flex justify-between text-xs text-[#a89888] mt-1">
                             <span>Failure Rate</span>
                             <span>{failureRate}%</span>
                         </div>
