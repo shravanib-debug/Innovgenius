@@ -159,7 +159,7 @@ const ClaimDetailPage = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         {evidence.map((file, i) => {
                             const isImage = (file.file_type || file.file_url || '').match(/\.(jpg|jpeg|png|gif|webp)/i) || file.file_type?.startsWith('image');
-                            const fileUrl = file.file_url?.startsWith('http') ? file.file_url : `http://localhost:5000${file.file_url}`;
+                            const fileUrl = file.file_url?.startsWith('http') ? file.file_url : `${import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : ''}${file.file_url}`;
 
                             return (
                                 <motion.div
