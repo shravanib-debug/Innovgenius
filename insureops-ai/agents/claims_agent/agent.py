@@ -133,7 +133,20 @@ def step_evidence_analysis(state: ClaimsState) -> ClaimsState:
     analyzer = EvidenceAnalyzer()
     results = []
     
-    for file_path in evidence_files:
+    for file_item in evidence_files:
+        # Resolve file path if item is a dict
+        if isinstance(file_item, dict):
+            file_path = file_item.get("path") or file_item.get("file_path") or file_item.get("url") or file_item.get("filepath")
+            if not file_path:
+                print(f"   ⚠️ Could not extract path from evidence item: {file_item}")
+                continue
+        else:
+            file_path = file_item
+
+        if not isinstance(file_path, str):
+             print(f"   ⚠️ Invalid file path format: {file_path}")
+             continue
+
         if ".." in file_path: continue 
         if os.path.exists(file_path):
             res = analyzer.analyze_evidence(file_path, context=claim)
