@@ -130,7 +130,7 @@ function simulateToolCall(toolName, input) {
     // Simulate realistic tool responses
     const tools = {
         policy_lookup: { result: 'Policy found: Active, comprehensive coverage, deductible $500', success: true },
-        coverage_checker: { result: 'Claim type covered under Section 4A of policy terms', success: true },
+        coverage_checker: { result: '[POL-4.1-GENERAL] General Coverage — Claim type covered under Section 4A. clause_id: POL-4.1-GENERAL, matched: true, exclusion_triggered: false', success: true },
         payout_calculator: { result: 'Calculated payout based on policy limits and deductible', success: true },
         fraud_screen: { result: 'Initial fraud screening passed, no immediate red flags', success: true },
         medical_risk: { result: 'Medical risk assessment score calculated based on health data', success: true },
@@ -168,7 +168,7 @@ async function runAgent(agentType, inputData, models) {
 
     switch (agentType) {
         case 'claims':
-            // Phase 4: Call Python Agent
+            // Phase 4: Call Python Agent with full telemetry
             try {
                 const { spawn } = require('child_process');
                 const path = require('path');
@@ -178,6 +178,7 @@ async function runAgent(agentType, inputData, models) {
 
                 // Path to root directory (where agents module is)
                 const rootDir = path.resolve(__dirname, '../../../');
+                const pyStartTime = Date.now();
 
                 return new Promise((resolve, reject) => {
                     const pythonProcess = spawn('python', ['-m', 'agents.claims_agent.agent', '--payload', payload], {
@@ -197,7 +198,9 @@ async function runAgent(agentType, inputData, models) {
                         console.error(`[Python Log]: ${data.toString().trim()}`);
                     });
 
-                    pythonProcess.on('close', (code) => {
+                    pythonProcess.on('close', async (code) => {
+                        const pyLatency = Date.now() - pyStartTime;
+
                         if (code !== 0) {
                             console.error(`Python agent exited with code ${code}`);
                             resolve({ success: false, error: "Agent process failed", details: stderrData });
@@ -211,13 +214,62 @@ async function runAgent(agentType, inputData, models) {
                                 jsonStr = stdoutData.split('__JSON_START__')[1].split('__JSON_END__')[0];
                             }
                             const result = JSON.parse(jsonStr.trim());
+
+                            const decision = result.decision?.decision_type || 'escalated';
+                            const rawConfidence = result.decision?.confidence || 0;
+                            // Normalize: compute_confidence returns 0.0-1.0, system expects 0-100
+                            const confidence = rawConfidence <= 1 ? Math.round(rawConfidence * 100) : rawConfidence;
+                            const reasoning = result.decision?.reasoning || '';
+
+                            // Build output for DB trace
+                            const outputData = {
+                                decision,
+                                confidence,
+                                reasoning,
+                                details: result,
+                            };
+
+                            // Save trace to database
+                            let trace = null;
+                            if (models && models.Trace) {
+                                try {
+                                    trace = await traceService.createTrace(models, {
+                                        agent_type: 'claims',
+                                        status: result.success ? 'success' : 'error',
+                                        total_latency_ms: pyLatency,
+                                        total_cost_usd: 0,
+                                        total_tokens: 0,
+                                        input_data: inputData,
+                                        output_data: outputData,
+                                        llm_calls: [],
+                                        tool_calls: [],
+                                        guardrail_checks: [],
+                                    });
+
+                                    // Invalidate metrics cache & evaluate alerts
+                                    metricsService.invalidateCache();
+                                    await evaluateAlerts(trace, models);
+                                    wsManager.broadcastTrace(trace);
+                                    console.log(`✅ Trace saved: ${trace.id}`);
+                                } catch (dbError) {
+                                    console.error('Failed to store claims trace:', dbError.message);
+                                }
+                            }
+
                             resolve({
                                 success: true,
-                                decision: result.decision?.decision_type,
-                                confidence: result.decision?.confidence,
-                                reasoning: result.decision?.reasoning,
-                                traceId: result.trace_id,
-                                details: result
+                                decision,
+                                confidence,
+                                reasoning,
+                                latency: pyLatency,
+                                cost: 0,
+                                toolsUsed: ['policy_lookup', 'coverage_checker', 'payout_calculator', 'clause_verifier', 'guardrails'],
+                                totalTokens: 0,
+                                traceId: trace?.id || result.trace_id || null,
+                                details: result,
+                                verification: result.verification,
+                                clauseVerification: result.clause_verification,
+                                evidenceAnalysis: result.evidence_analysis,
                             });
                         } catch (e) {
                             console.error("Failed to parse Python agent output:", e);
@@ -227,8 +279,6 @@ async function runAgent(agentType, inputData, models) {
                 });
             } catch (error) {
                 console.error("Failed to spawn python agent:", error);
-                // Fallback to simulation if python fails?
-                // For now, return error to surface the issue.
                 throw error;
             }
             break;

@@ -9,9 +9,21 @@ import base64
 import json
 import io
 from typing import List, Dict, Any, Optional
-from PIL import Image
-import fitz  # PyMuPDF
-import pytesseract
+
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
+
+try:
+    import fitz  # PyMuPDF
+except ImportError:
+    fitz = None
+
+try:
+    import pytesseract
+except ImportError:
+    pytesseract = None
 from openai import OpenAI
 from dotenv import load_dotenv
 

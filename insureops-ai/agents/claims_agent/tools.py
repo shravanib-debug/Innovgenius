@@ -50,114 +50,175 @@ def policy_lookup(policy_id: str) -> tuple[dict, ToolCallRecord]:
     return result, record
 
 
-def coverage_checker(claim_type: str, policy_data: dict) -> tuple[dict, ToolCallRecord]:
+def coverage_checker(claim_type: str, policy_data: dict, claim_description: str = "") -> tuple[dict, ToolCallRecord]:
     """
     Check if a specific claim type is covered under the given policy.
-    Returns coverage status, applicable limits, and exclusions.
+    Returns structured clause attribution with coverage status, limits, and exclusions.
+
+    Each clause object includes:
+      - clause_id: Deterministic unique ID (e.g., "POL-2.3-WATER")
+      - section_title: Human-readable section name
+      - matched: Whether the claim_type was recognized in policy rules
+      - exclusion_triggered: Whether any exclusion keyword was found in the claim description
+      - coverage_limit: Resolved numeric limit from policy data (or None)
     """
     with Timer() as timer:
-        # Coverage mapping — which claim types are covered
+        # Coverage mapping — structured clause objects with deterministic IDs
         coverage_rules = {
             "water_damage": {
+                "clause_id": "POL-2.3-WATER",
+                "section_title": "Water Damage Coverage (Limited)",
                 "covered": True,
                 "coverage_section": "Section 2.3 — Water Damage (Limited)",
                 "notes": "Burst pipes and plumbing failures are covered. Flood damage excluded.",
-                "exclusions": ["flood", "gradual_seepage", "ground_water"],
+                "exclusions": ["Flood unless rider", "Gradual seepage", "Ground water infiltration"],
+                "exclusion_codes": ["flood", "gradual_seepage", "ground_water"],
                 "applicable_limit": "dwelling_coverage",
                 "deductible": "standard"
             },
             "fire_damage": {
+                "clause_id": "POL-2.1-FIRE",
+                "section_title": "Fire and Lightning Coverage",
                 "covered": True,
                 "coverage_section": "Section 2.1 — Fire and Lightning",
                 "notes": "All fire damage covered including smoke damage and firefighting water damage.",
-                "exclusions": ["intentional_arson_by_policyholder"],
+                "exclusions": ["Intentional arson by policyholder"],
+                "exclusion_codes": ["intentional_arson_by_policyholder"],
                 "applicable_limit": "dwelling_coverage",
                 "deductible": "standard"
             },
             "flood_damage": {
+                "clause_id": "POL-3.1-FLOOD",
+                "section_title": "Flood Exclusion",
                 "covered": False,
                 "coverage_section": "Section 3.1 — Excluded",
                 "notes": "Flood damage requires separate NFIP or private flood insurance policy.",
-                "exclusions": ["all_flood_types"],
+                "exclusions": ["All flood types excluded"],
+                "exclusion_codes": ["all_flood_types"],
                 "applicable_limit": None,
                 "deductible": None
             },
             "theft": {
+                "clause_id": "POL-2.4-THEFT",
+                "section_title": "Theft and Vandalism Coverage",
                 "covered": True,
                 "coverage_section": "Section 2.4 — Theft and Vandalism",
                 "notes": "Theft covered. Police report required within 48 hours. Sub-limits apply to jewelry and electronics.",
-                "exclusions": ["mysterious_disappearance"],
+                "exclusions": ["Mysterious disappearance"],
+                "exclusion_codes": ["mysterious_disappearance"],
                 "applicable_limit": "personal_property_coverage",
                 "deductible": "standard"
             },
             "auto_collision": {
+                "clause_id": "POL-5.4-COLLISION",
+                "section_title": "Auto Insurance Collision Coverage",
                 "covered": True,
                 "coverage_section": "Section 5.4 — Auto Insurance Coverage",
                 "notes": "Collision coverage for damage to insured vehicle in an accident.",
-                "exclusions": ["intentional_damage"],
+                "exclusions": ["Intentional damage"],
+                "exclusion_codes": ["intentional_damage"],
                 "applicable_limit": "auto_collision_limit",
                 "deductible": "collision"
             },
             "auto_glass": {
+                "clause_id": "POL-5.4-GLASS",
+                "section_title": "Auto Glass Coverage",
                 "covered": True,
                 "coverage_section": "Section 5.4 — Glass Coverage",
                 "notes": "Full windshield replacement covered with $0 deductible.",
                 "exclusions": [],
+                "exclusion_codes": [],
                 "applicable_limit": "auto_glass_limit",
                 "deductible": "none"
             },
             "medical": {
+                "clause_id": "POL-1.6-MEDICAL",
+                "section_title": "Medical Payments Coverage (F)",
                 "covered": True,
                 "coverage_section": "Section 1.6 — Medical Payments Coverage (F)",
                 "notes": "Medical expenses covered regardless of fault. Limit $5,000 per person.",
                 "exclusions": [],
+                "exclusion_codes": [],
                 "applicable_limit": "medical_coverage",
                 "deductible": "none"
             },
             "liability": {
+                "clause_id": "POL-1.5-LIABILITY",
+                "section_title": "Personal Liability Coverage (E)",
                 "covered": True,
                 "coverage_section": "Section 1.5 — Personal Liability Coverage (E)",
                 "notes": "Protects against lawsuits for bodily injury or property damage.",
-                "exclusions": ["intentional_acts"],
+                "exclusions": ["Intentional acts"],
+                "exclusion_codes": ["intentional_acts"],
                 "applicable_limit": "liability_coverage",
                 "deductible": "none"
             },
             "windstorm": {
+                "clause_id": "POL-2.2-WIND",
+                "section_title": "Windstorm and Hail Coverage",
                 "covered": True,
                 "coverage_section": "Section 2.2 — Windstorm and Hail",
                 "notes": "Damage from severe wind events covered. Separate deductible applies.",
                 "exclusions": [],
+                "exclusion_codes": [],
                 "applicable_limit": "dwelling_coverage",
                 "deductible": "wind_hail"
             },
             "structural": {
+                "clause_id": "POL-3.3-STRUCTURAL",
+                "section_title": "Neglect and Maintenance Exclusion",
                 "covered": False,
                 "coverage_section": "Section 3.3 — Neglect and Maintenance Exclusion",
                 "notes": "Foundation settling and structural issues due to maintenance are typically excluded.",
-                "exclusions": ["wear_and_tear", "settling", "maintenance"],
+                "exclusions": ["Wear and tear", "Settling", "Maintenance neglect"],
+                "exclusion_codes": ["wear_and_tear", "settling", "maintenance"],
                 "applicable_limit": None,
                 "deductible": None
             }
         }
 
+        matched = claim_type in coverage_rules
+
         rule = coverage_rules.get(claim_type, {
+            "clause_id": "POL-0.0-UNKNOWN",
+            "section_title": "Unknown Coverage Type",
             "covered": False,
             "coverage_section": "Unknown",
             "notes": f"Claim type '{claim_type}' not recognized in policy coverage.",
             "exclusions": [],
+            "exclusion_codes": [],
             "applicable_limit": None,
             "deductible": None
         })
 
-        # Add applicable limit value from policy data
+        # Set matched flag
+        rule["matched"] = matched
+
+        # Resolve coverage_limit from policy data
         if rule["applicable_limit"] and policy_data:
             limit_key = rule["applicable_limit"]
-            rule["limit_amount"] = policy_data.get(limit_key, "N/A")
+            resolved_limit = policy_data.get(limit_key)
+            rule["coverage_limit"] = resolved_limit if isinstance(resolved_limit, (int, float)) else None
+            rule["limit_amount"] = resolved_limit if resolved_limit is not None else "N/A"
+        else:
+            rule["coverage_limit"] = None
+            rule["limit_amount"] = "N/A" if rule["applicable_limit"] else None
+
+        # Determine if any exclusion is triggered based on claim description
+        description_lower = claim_description.lower() if claim_description else ""
+        exclusion_codes = rule.get("exclusion_codes", [])
+        triggered_exclusions = [
+            code for code in exclusion_codes
+            if code.replace("_", " ") in description_lower or code in description_lower
+        ]
+        rule["exclusion_triggered"] = len(triggered_exclusions) > 0
+        rule["triggered_exclusion_codes"] = triggered_exclusions
 
     record = ToolCallRecord(
         tool_name="coverage_checker",
-        parameters={"claim_type": claim_type},
-        result_summary=f"{claim_type}: {'Covered' if rule['covered'] else 'Not Covered'} — {rule['coverage_section']}",
+        parameters={"claim_type": claim_type, "clause_id": rule["clause_id"]},
+        result_summary=f"{claim_type}: {'Covered' if rule['covered'] else 'Not Covered'} — [{rule['clause_id']}] {rule['section_title']}"
+                       + (f" (exclusion triggered: {triggered_exclusions})" if triggered_exclusions else ""),
         duration_ms=timer.elapsed_ms,
         success=True
     )

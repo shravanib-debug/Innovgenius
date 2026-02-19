@@ -136,7 +136,9 @@ const AgentResultCard = ({ result }) => {
                     <div className="flex justify-center mb-1"><Clock size={14} className="text-[#7a6550]" /></div>
                     <p className="text-[10px] text-[#7a6550] uppercase tracking-wider">Latency</p>
                     <p className="text-sm font-bold text-[#f1ebe4]">
-                        {result.latency >= 1000 ? `${(result.latency / 1000).toFixed(1)}s` : `${result.latency}ms`}
+                        {result.latency != null
+                            ? (result.latency >= 1000 ? `${(result.latency / 1000).toFixed(1)}s` : `${result.latency}ms`)
+                            : '—'}
                     </p>
                 </div>
                 <div className="bg-[#0f0d0b] rounded-lg p-3 text-center">

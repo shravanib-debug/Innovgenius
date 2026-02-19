@@ -20,6 +20,13 @@ class PolicyRAG:
         self.section_index = {}
         self._load_and_chunk()
 
+    def get_full_policy_text(self) -> str:
+        """Return the full raw policy document text."""
+        if not os.path.exists(self.policy_path):
+            return ""
+        with open(self.policy_path, "r", encoding="utf-8") as f:
+            return f.read()
+
     def _load_and_chunk(self):
         """Load the policy document and split into searchable chunks."""
         if not os.path.exists(self.policy_path):
