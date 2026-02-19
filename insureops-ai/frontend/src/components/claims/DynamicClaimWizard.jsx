@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import InsuranceTypeSelector from './InsuranceTypeSelector';
-import EvidenceUploader from './EvidenceUploader';
+import EvidenceUploader, { EVIDENCE_REQUIREMENTS } from './EvidenceUploader';
 import VerificationChecklist from './VerificationChecklist';
 
 // ─── Type-Specific Field Definitions ──────────────────
@@ -66,7 +66,16 @@ const DynamicClaimWizard = ({ onSubmit }) => {
     const canGoNext = () => {
         if (step === 0) return !!insuranceType;
         if (step === 1) return commonFields.policy_id && commonFields.claim_amount && commonFields.description;
-        if (step === 2) return true; // evidence is optional to proceed
+
+        // Step 2: Evidence - Enforce required documents
+        if (step === 2) {
+            const reqs = EVIDENCE_REQUIREMENTS[insuranceType] || [];
+            const requiredKeys = reqs.filter(r => r.required).map(r => r.key);
+            const uploadedKeys = evidenceFiles.map(f => f._requirementKey);
+            const missing = requiredKeys.filter(k => !uploadedKeys.includes(k));
+            return missing.length === 0;
+        }
+
         return true;
     };
 
@@ -136,8 +145,8 @@ const DynamicClaimWizard = ({ onSubmit }) => {
                     {STEPS.map((s, idx) => (
                         <div key={s.key} className="flex items-center gap-1">
                             <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${idx < step ? 'bg-[#22c55e] text-white'
-                                    : idx === step ? 'bg-[#e8722a] text-white shadow-[0_0_12px_rgba(232,114,42,0.3)]'
-                                        : 'bg-[#1c1815] text-[#5a4a3a] border border-[#2a201a]'
+                                : idx === step ? 'bg-[#e8722a] text-white shadow-[0_0_12px_rgba(232,114,42,0.3)]'
+                                    : 'bg-[#1c1815] text-[#5a4a3a] border border-[#2a201a]'
                                 }`}>
                                 {idx < step ? '✓' : idx + 1}
                             </div>
@@ -350,8 +359,8 @@ const DynamicClaimWizard = ({ onSubmit }) => {
                     onClick={handleBack}
                     disabled={step === 0}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${step === 0
-                            ? 'text-[#3a2e24] cursor-not-allowed'
-                            : 'text-[#a89888] hover:text-[#f1ebe4] hover:bg-[#2a201a]'
+                        ? 'text-[#3a2e24] cursor-not-allowed'
+                        : 'text-[#a89888] hover:text-[#f1ebe4] hover:bg-[#2a201a]'
                         }`}
                 >
                     ← Back
@@ -363,8 +372,8 @@ const DynamicClaimWizard = ({ onSubmit }) => {
                         onClick={handleNext}
                         disabled={!canGoNext()}
                         className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${canGoNext()
-                                ? 'bg-[#e8722a] text-white hover:bg-[#c45a1a]'
-                                : 'bg-[#2a201a] text-[#5a4a3a] cursor-not-allowed'
+                            ? 'bg-[#e8722a] text-white hover:bg-[#c45a1a]'
+                            : 'bg-[#2a201a] text-[#5a4a3a] cursor-not-allowed'
                             }`}
                     >
                         Next →

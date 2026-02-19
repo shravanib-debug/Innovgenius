@@ -7,6 +7,8 @@ import TracesPage from './pages/TracesPage'
 import TraceDetailPage from './pages/TraceDetailPage'
 import AlertsPage from './pages/AlertsPage'
 import AgentConsolePage from './pages/AgentConsolePage'
+import ClaimsListPage from './pages/ClaimsListPage'
+import ClaimDetailPage from './pages/ClaimDetailPage'
 
 import DashboardLayout from './components/layout/DashboardLayout'
 import DashboardPage from './pages/DashboardPage'
@@ -25,6 +27,8 @@ function App() {
         <Route path="llm-logs" element={<Section2Page />} />
         <Route path="alerts" element={<AlertsPage />} />
         <Route path="agents" element={<AgentConsolePage />} />
+        <Route path="claims" element={<ClaimsListPage />} />
+        <Route path="claims/:claimId" element={<ClaimDetailPage />} />
         {/* Catch-all for dashboard subpages */}
         <Route path="*" element={<DashboardPage />} />
       </Route>

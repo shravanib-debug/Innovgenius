@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { getTraceDetail } from '../services/api';
 import { useApiData } from '../hooks/useApiData';
+import VerificationPanel from '../components/traces/VerificationPanel';
 
 const decisionConfig = {
     approved: { icon: CheckCircle, color: '#22c55e', bg: 'bg-[#22c55e]/10', border: 'border-[#22c55e]/30' },
@@ -201,6 +202,9 @@ const TraceDetailPage = () => {
                     </div>
                 </div>
             )}
+
+            {/* Verification & XAI Panel (v2) */}
+            <VerificationPanel trace={trace} />
 
             {/* Input / Output */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

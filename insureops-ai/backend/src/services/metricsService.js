@@ -62,6 +62,19 @@ async function getSection2(models, timerange = '24h', agentFilter = null) {
 }
 
 /**
+ * Get insurance-type domain metrics (v2)
+ */
+async function getInsuranceType(models, timerange = '24h') {
+    const cacheKey = `insurance_type_${timerange}`;
+    const cached = _getCached(cacheKey);
+    if (cached) return cached;
+
+    const data = await analytics.getInsuranceTypeMetrics(models, timerange);
+    _setCache(cacheKey, data);
+    return data;
+}
+
+/**
  * Invalidate cache (called after new trace ingestion)
  */
 function invalidateCache() {
@@ -72,5 +85,6 @@ module.exports = {
     getOverview,
     getSection1,
     getSection2,
+    getInsuranceType,
     invalidateCache
 };

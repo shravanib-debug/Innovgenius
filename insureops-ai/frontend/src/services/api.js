@@ -28,6 +28,17 @@ export const getSection2Metrics = (range = '24h') =>
 export const getAgentMetrics = (agentType, range = '24h') =>
     api.get(`/metrics/agent/${agentType}?timerange=${range}`).then(r => r.data);
 
+// ── Claims ───────────────────────────────────
+export const getClaims = (params = {}) =>
+    api.get('/claims', { params }).then(r => r.data);
+
+export const getClaimDetail = (claimId) =>
+    api.get(`/claims/${claimId}`).then(r => r.data);
+
+// ── Insurance Type Metrics ───────────────────
+export const getInsuranceTypeMetrics = (timerange = '24h') =>
+    api.get(`/metrics/by-insurance-type?timerange=${timerange}`).then(r => r.data);
+
 // ── Traces ───────────────────────────────────
 export const getTraces = (params = {}) =>
     api.get('/traces', { params }).then(r => r.data);

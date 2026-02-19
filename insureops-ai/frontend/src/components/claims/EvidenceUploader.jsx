@@ -42,106 +42,59 @@ const EvidenceUploader = ({ insuranceType, files, onFilesChange }) => {
     const fileInputRef = useRef(null);
     const requirements = EVIDENCE_REQUIREMENTS[insuranceType] || [];
     const requiredCount = requirements.filter(r => r.required).length;
-    const uploadedReqCount = Math.min(files.length, requiredCount);
-    const completenessScore = requiredCount > 0 ? uploadedReqCount / requiredCount : 0;
+    // Calculate completeness based on satisfied requirements, not just file count
+    const satisfiedReqs = requirements.filter(r => files.some(f => f._requirementKey === r.key)).length;
+    const completenessScore = requiredCount > 0 ? satisfiedReqs / requiredCount : 0;
 
-    const handleFiles = (newFiles) => {
-        const validFiles = [];
-        const errors = [];
+    const handleFileForRequirement = (newFiles, req) => {
+        const file = newFiles[0];
+        if (!file) return;
 
-        Array.from(newFiles).forEach(file => {
-            if (!ACCEPTED_TYPES.includes(file.type)) {
-                errors.push(`${file.name}: Only PDF, JPG, and PNG files are accepted`);
-                return;
-            }
-            if (file.size > MAX_FILE_SIZE) {
-                errors.push(`${file.name}: File exceeds 10MB limit`);
-                return;
-            }
-            // Add preview URL for images
-            const enriched = file;
-            if (file.type.startsWith('image/')) {
-                enriched._preview = URL.createObjectURL(file);
-            }
-            // Auto-assign category based on order of requirements
-            const assignedReq = requirements[files.length + validFiles.length];
-            enriched._category = assignedReq?.category || 'general';
-            validFiles.push(enriched);
-        });
-
-        if (errors.length > 0) {
-            alert(errors.join('\n'));
+        if (!ACCEPTED_TYPES.includes(file.type)) {
+            alert(`${file.name}: Only PDF, JPG, and PNG files are accepted`);
+            return;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+            alert(`${file.name}: File exceeds 10MB limit`);
+            return;
         }
 
-        if (validFiles.length > 0) {
-            onFilesChange([...files, ...validFiles]);
+        const enriched = file;
+        if (file.type.startsWith('image/')) {
+            enriched._preview = URL.createObjectURL(file);
         }
+        enriched._category = req.category;
+        enriched._requirementKey = req.key;
+        enriched._label = req.label;
+
+        // Remove existing file for this requirement if any, then add new one
+        const others = files.filter(f => f._requirementKey !== req.key);
+        onFilesChange([...others, enriched]);
     };
 
-    const handleDrop = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        handleFiles(e.dataTransfer.files);
-    };
-
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-
-    const handleRemove = (idx) => {
-        const updated = [...files];
-        if (updated[idx]._preview) {
-            URL.revokeObjectURL(updated[idx]._preview);
+    const handleRemove = (key) => {
+        const fileToRemove = files.find(f => f._requirementKey === key);
+        if (fileToRemove?._preview) {
+            URL.revokeObjectURL(fileToRemove._preview);
         }
-        updated.splice(idx, 1);
-        onFilesChange(updated);
+        onFilesChange(files.filter(f => f._requirementKey !== key));
     };
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
             <div>
                 <h3 className="text-lg font-semibold text-[#f1ebe4] mb-1">Upload Evidence</h3>
-                <p className="text-xs text-[#7a6550]">Upload supporting documents for your {insuranceType} insurance claim.</p>
-            </div>
-
-            {/* Evidence checklist */}
-            <div className="bg-[#0f0d0b] border border-[#2a201a] rounded-xl p-4">
-                <h4 className="text-xs font-semibold text-[#a89888] mb-3 uppercase tracking-wider">Required Documents</h4>
-                <div className="space-y-2">
-                    {requirements.map((req, idx) => {
-                        const isUploaded = idx < files.length;
-                        return (
-                            <div key={req.key} className="flex items-center gap-2">
-                                <div className={`w-4 h-4 rounded flex items-center justify-center text-[10px] ${isUploaded
-                                        ? 'bg-[#22c55e]/20 text-[#22c55e] border border-[#22c55e]/30'
-                                        : req.required
-                                            ? 'bg-[#ef4444]/10 text-[#ef4444] border border-[#ef4444]/20'
-                                            : 'bg-[#1c1815] text-[#5a4a3a] border border-[#2a201a]'
-                                    }`}>
-                                    {isUploaded ? '✓' : req.required ? '!' : '○'}
-                                </div>
-                                <span className={`text-sm ${isUploaded ? 'text-[#f1ebe4]' : 'text-[#7a6550]'}`}>
-                                    {req.label}
-                                </span>
-                                {!req.required && (
-                                    <span className="text-[10px] text-[#5a4a3a] px-1.5 py-0.5 rounded bg-[#1c1815] border border-[#2a201a]">Optional</span>
-                                )}
-                                <span className="text-[10px] text-[#5a4a3a] ml-auto">{req.category}</span>
-                            </div>
-                        );
-                    })}
-                </div>
+                <p className="text-xs text-[#7a6550]">Please upload the specific documents required for your {insuranceType} claim.</p>
             </div>
 
             {/* Completeness score */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-2">
                 <div className="flex-1 h-2 bg-[#1c1815] rounded-full overflow-hidden">
                     <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
                             width: `${Math.min(completenessScore * 100, 100)}%`,
-                            backgroundColor: completenessScore >= 0.8 ? '#22c55e' : completenessScore >= 0.5 ? '#eab308' : '#ef4444',
+                            backgroundColor: completenessScore >= 1 ? '#22c55e' : completenessScore >= 0.5 ? '#eab308' : '#ef4444',
                         }}
                     />
                 </div>
@@ -150,28 +103,72 @@ const EvidenceUploader = ({ insuranceType, files, onFilesChange }) => {
                 </span>
             </div>
 
-            {/* Drop zone */}
-            <div
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-[#2a201a] rounded-xl p-6 text-center cursor-pointer hover:border-[#e8722a]/30 hover:bg-[#e8722a]/5 transition-all duration-200"
-            >
-                <div className="text-3xl mb-2">📁</div>
-                <p className="text-sm text-[#a89888]">Drag & drop files here, or <span className="text-[#e8722a]">click to browse</span></p>
-                <p className="text-xs text-[#5a4a3a] mt-1">PDF, JPG, PNG • Max 10MB per file</p>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    className="hidden"
-                    onChange={(e) => handleFiles(e.target.files)}
-                />
+            {/* Requirement Slots */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {requirements.map((req) => {
+                    const file = files.find(f => f._requirementKey === req.key);
+
+                    return (
+                        <div key={req.key} className={`border rounded-xl p-4 transition-all ${file
+                                ? 'bg-[#0f0d0b] border-[#22c55e]/30'
+                                : 'bg-[#1c1815] border-[#2a201a] hover:border-[#e8722a]/30'
+                            }`}>
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h4 className={`text-sm font-medium ${file ? 'text-[#22c55e]' : 'text-[#f1ebe4]'}`}>
+                                            {req.label}
+                                        </h4>
+                                        {req.required && !file && (
+                                            <span className="text-[10px] text-[#ef4444] font-bold px-1.5 py-0.5 bg-[#ef4444]/10 rounded border border-[#ef4444]/20">REQUIRED</span>
+                                        )}
+                                        {file && (
+                                            <span className="text-[10px] text-[#22c55e] font-bold px-1.5 py-0.5 bg-[#22c55e]/10 rounded border border-[#22c55e]/20">UPLOADED</span>
+                                        )}
+                                    </div>
+                                    <p className="text-[10px] text-[#7a6550] mt-0.5">{req.category} evidence</p>
+                                </div>
+                            </div>
+
+                            {file ? (
+                                <div className="flex items-center gap-3 bg-[#1c1815] rounded-lg p-2 border border-[#2a201a]">
+                                    {file._preview ? (
+                                        <img src={file._preview} alt="Preview" className="w-10 h-10 object-cover rounded" />
+                                    ) : (
+                                        <div className="w-10 h-10 bg-[#2a201a] rounded flex items-center justify-center text-lg">📄</div>
+                                    )}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs text-[#f1ebe4] truncate">{file.name}</p>
+                                        <p className="text-[10px] text-[#5a4a3a]">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                    </div>
+                                    <button
+                                        onClick={() => handleRemove(req.key)}
+                                        className="text-[#a89888] hover:text-[#ef4444] p-1.5 transition-colors"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ) : (
+                                <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-[#2a201a] rounded-lg cursor-pointer hover:bg-[#2a201a]/30 hover:border-[#e8722a]/30 group transition-all">
+                                    <span className="text-xl group-hover:scale-110 transition-transform mb-1">☁️</span>
+                                    <span className="text-[10px] text-[#7a6550] group-hover:text-[#e8722a]">Click to Upload</span>
+                                    <input
+                                        type="file"
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        className="hidden"
+                                        onChange={(e) => handleFileForRequirement(e.target.files, req)}
+                                    />
+                                </label>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
-            {/* Preview panel */}
-            <EvidencePreviewPanel files={files} onRemove={handleRemove} />
+            {/* Note */}
+            <p className="text-[10px] text-[#5a4a3a] text-center mt-4">
+                Supported formats: PDF, JPG, PNG • Max size: 10MB per file
+            </p>
         </div>
     );
 };

@@ -7,7 +7,10 @@ import LatencyWidget from '../components/section1/LatencyWidget';
 import ApiRatesWidget from '../components/section1/ApiRatesWidget';
 import CostTrackerWidget from '../components/section1/CostTrackerWidget';
 import DriftWidget from '../components/section1/DriftWidget';
-import { getSection1Metrics } from '../services/api';
+import InsuranceTypeDistribution from '../components/section1/InsuranceTypeDistribution';
+import VerificationLatencyWidget from '../components/section1/VerificationLatencyWidget';
+import EvidenceCompletenessWidget from '../components/section1/EvidenceCompletenessWidget';
+import { getSection1Metrics, getInsuranceTypeMetrics } from '../services/api';
 import { useApiData } from '../hooks/useApiData';
 
 const Section1Page = () => {
@@ -15,6 +18,9 @@ const Section1Page = () => {
 
     const fetchFn = useCallback(() => getSection1Metrics(timeRange), [timeRange]);
     const { data, loading, isLive } = useApiData(fetchFn, null, [timeRange]);
+
+    const fetchInsurance = useCallback(() => getInsuranceTypeMetrics(timeRange), [timeRange]);
+    const { data: insuranceData, loading: insuranceLoading } = useApiData(fetchInsurance, null, [timeRange]);
 
     return (
         <div className="space-y-6">
@@ -39,6 +45,18 @@ const Section1Page = () => {
                 <ApiRatesWidget data={data?.apiRates} loading={loading} />
                 <CostTrackerWidget data={data?.cost} loading={loading} />
                 <DriftWidget data={data?.drift} loading={loading} />
+            </div>
+
+            {/* Insurance Domain Analytics (v2) */}
+            <div>
+                <h2 className="text-xl font-bold text-[#f1ebe4] mb-1">Insurance Analytics</h2>
+                <p className="text-sm text-[#7a6550] mb-4">Domain-specific metrics across all 5 insurance types</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InsuranceTypeDistribution data={insuranceData} loading={insuranceLoading} />
+                <VerificationLatencyWidget data={insuranceData} loading={insuranceLoading} />
+                <EvidenceCompletenessWidget data={insuranceData} loading={insuranceLoading} />
             </div>
         </div>
     );

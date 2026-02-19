@@ -54,4 +54,19 @@ router.get('/section2', async (req, res) => {
     }
 });
 
+/**
+ * GET /api/metrics/by-insurance-type
+ * Query: ?timerange=1h|6h|24h|7d
+ */
+router.get('/by-insurance-type', async (req, res) => {
+    try {
+        const { timerange = '24h' } = req.query;
+        const data = await metricsService.getInsuranceType(req.app.locals.models, timerange);
+        res.json(data);
+    } catch (error) {
+        console.error('Metrics insurance-type error:', error.message);
+        res.status(500).json({ error: 'Failed to fetch insurance type metrics' });
+    }
+});
+
 module.exports = router;

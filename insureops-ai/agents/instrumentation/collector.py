@@ -1,6 +1,8 @@
 """
 Telemetry Collector — Central hub for collecting traces and metrics
 and sending them to the backend API for storage and visualization.
+
+v2: Extended payload includes verification-level fields (backward compatible).
 """
 
 import json
@@ -54,13 +56,22 @@ class TelemetryCollector:
         return self._metrics_collectors[agent_type]
 
     def send_trace(self, trace: TraceSchema) -> bool:
-        """Send a completed trace to the backend."""
+        """
+        Send a completed trace to the backend.
+        
+        v2: The trace.to_dict() now includes verification-level fields
+        (insurance_type, verification_steps, missing_documents, etc.)
+        when populated. These fields are optional for backward compatibility
+        with v1 agents (underwriting, fraud).
+        """
         try:
             import urllib.request
 
+            trace_dict = trace.to_dict()
+
             payload = json.dumps({
                 "type": "trace",
-                "data": trace.to_dict(),
+                "data": trace_dict,
             }).encode("utf-8")
 
             req = urllib.request.Request(
@@ -73,6 +84,14 @@ class TelemetryCollector:
             with urllib.request.urlopen(req, timeout=5) as resp:
                 if resp.status == 200 or resp.status == 201:
                     logger.info(f"Trace {trace.trace_id} sent successfully")
+                    # Log v2 fields if present
+                    if trace.insurance_type:
+                        logger.info(
+                            f"  v2: type={trace.insurance_type}, "
+                            f"steps={len(trace.verification_steps)}, "
+                            f"evidence={trace.evidence_count}, "
+                            f"completeness={trace.evidence_completeness_score:.2f}"
+                        )
                     return True
 
         except Exception as e:
