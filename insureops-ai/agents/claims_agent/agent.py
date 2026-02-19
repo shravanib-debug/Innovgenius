@@ -273,10 +273,9 @@ def step_llm_analysis(state: ClaimsState) -> ClaimsState:
     except:
         analysis = {
             "decision": "escalated",
-            "generated_clauses": [],
-            "policy_text_citations": [],
-            "evidence_used": [],
-            "reasoning_summary": "Failed to parse LLM response"
+            "generated_policy_clauses": [],
+            "claim_facts_considered": [],
+            "final_reasoning_summary": "Failed to parse LLM response"
         }
 
     state["llm_analysis"] = analysis
@@ -394,13 +393,15 @@ def step_deterministic_guardrails(state: ClaimsState) -> ClaimsState:
             overridden = True
             print(f"     ⚠️ OVERRIDE: approved → rejected (exclusion codes: {triggered})")
 
-    # Rule 2: If LLM generated clauses with impact=exclusion, decision cannot be approved
-    for clause in analysis.get("generated_clauses", []):
-        if clause.get("impact") == "exclusion" and analysis.get("decision") == "approved":
+    # Rule 2: If LLM generated clauses with impact_on_claim=exclusion or clause_type=exclusion, cannot approve
+    for clause in analysis.get("generated_policy_clauses", []):
+        impact = clause.get("impact_on_claim", clause.get("impact", ""))
+        ctype = clause.get("clause_type", "")
+        if (impact == "exclusion" or ctype == "exclusion") and analysis.get("decision") == "approved":
             analysis["decision"] = "rejected"
             sec = clause.get("section_number", "unknown")
             override_reasons.append(
-                f"Deterministic override: LLM cited exclusion clause POLICY_SECTION_{sec}"
+                f"Deterministic override: LLM cited exclusion clause Section {sec}"
             )
             overridden = True
             print(f"     ⚠️ OVERRIDE: approved → rejected (exclusion clause: {sec})")
@@ -463,7 +464,7 @@ def step_finalize(state: ClaimsState) -> ClaimsState:
     decision = DecisionRecord(
         decision_type=analysis.get("decision", "escalated"),
         confidence=confidence,
-        reasoning=analysis.get("reasoning_summary", analysis.get("reasoning", "")),
+        reasoning=analysis.get("final_reasoning_summary", analysis.get("reasoning_summary", analysis.get("reasoning", ""))),
         escalated_to_human=analysis.get("decision") == "escalated",
         human_override=None,
         human_decision=None
@@ -494,8 +495,8 @@ def step_finalize(state: ClaimsState) -> ClaimsState:
 
     # Collect section numbers from LLM output
     llm_generated_sections = [
-        f"POLICY_SECTION_{c.get('section_number', '?')}"
-        for c in analysis.get("generated_clauses", [])
+        f"Section_{c.get('section_number', '?')}"
+        for c in analysis.get("generated_policy_clauses", [])
     ]
 
     clause_verification = state.get("clause_verification", {})
@@ -506,8 +507,9 @@ def step_finalize(state: ClaimsState) -> ClaimsState:
         "confidence": decision.confidence,
         "reasoning": decision.reasoning,
         "clause_attribution": clause_attribution,
-        "generated_clauses": analysis.get("generated_clauses", []),
-        "policy_text_citations": analysis.get("policy_text_citations", []),
+        "generated_policy_clauses": analysis.get("generated_policy_clauses", []),
+        "claim_facts_considered": analysis.get("claim_facts_considered", []),
+        "final_reasoning_summary": analysis.get("final_reasoning_summary", ""),
         "deterministic_overrides": analysis.get("deterministic_overrides", []),
         "verification": state.get("verification_results", {}),
         "evidence_analysis_summary": f"Analyzed {len(state.get('evidence_analysis', []))} files",
