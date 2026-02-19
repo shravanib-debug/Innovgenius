@@ -62,6 +62,41 @@ const Trace = sequelize.define('Trace', {
     output_data: {
         type: DataTypes.JSONB,
         allowNull: true
+    },
+    // ─── v2 Verification Columns ─────────────────────
+    insurance_type: {
+        type: DataTypes.STRING(20),
+        allowNull: true
+    },
+    claim_id: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: { model: 'claims', key: 'id' }
+    },
+    verification_steps_executed: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    },
+    missing_documents: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    },
+    evidence_count: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0
+    },
+    evidence_completeness_score: {
+        type: DataTypes.DECIMAL(3, 2),
+        allowNull: true
+    },
+    verification_latency: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    evidence_used_in_decision: {
+        type: DataTypes.JSONB,
+        allowNull: true
     }
 }, {
     tableName: 'traces',
@@ -344,6 +379,126 @@ const MetricsSnapshot = sequelize.define('MetricsSnapshot', {
     underscored: true
 });
 
+// ─── Claim Model ─────────────────────────────────────
+const Claim = sequelize.define('Claim', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    policy_id: {
+        type: DataTypes.STRING(50),
+        allowNull: false
+    },
+    insurance_type: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        validate: {
+            isIn: [['health', 'life', 'vehicle', 'travel', 'property']]
+        }
+    },
+    claim_type: {
+        type: DataTypes.STRING(50),
+        allowNull: true
+    },
+    incident_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
+    claim_amount: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: false,
+        defaultValue: 0
+    },
+    description: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+    location: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    status: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: 'pending',
+        validate: {
+            isIn: [['pending', 'in_review', 'approved', 'rejected', 'escalated']]
+        }
+    },
+    verification_status: {
+        type: DataTypes.STRING(20),
+        allowNull: false,
+        defaultValue: 'not_started',
+        validate: {
+            isIn: [['not_started', 'in_progress', 'complete', 'failed']]
+        }
+    },
+    evidence_completeness_score: {
+        type: DataTypes.DECIMAL(3, 2),
+        allowNull: true,
+        defaultValue: 0.00
+    },
+    type_specific_data: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    }
+}, {
+    tableName: 'claims',
+    timestamps: true,
+    underscored: true
+});
+
+// ─── Claim Evidence Model ────────────────────────────
+const ClaimEvidence = sequelize.define('ClaimEvidence', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    claim_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: { model: 'claims', key: 'id' }
+    },
+    file_url: {
+        type: DataTypes.STRING(500),
+        allowNull: false
+    },
+    file_name: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    file_type: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+        validate: {
+            isIn: [['pdf', 'jpg', 'png']]
+        }
+    },
+    file_size_bytes: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    evidence_category: {
+        type: DataTypes.STRING(50),
+        allowNull: false
+    },
+    insurance_type: {
+        type: DataTypes.STRING(20),
+        allowNull: true
+    },
+    uploaded_at: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        defaultValue: DataTypes.NOW
+    }
+}, {
+    tableName: 'claim_evidence',
+    timestamps: true,
+    underscored: true
+});
+
 module.exports = {
     Trace,
     LLMCall,
@@ -351,5 +506,7 @@ module.exports = {
     GuardrailCheck,
     AlertRule,
     Alert,
-    MetricsSnapshot
+    MetricsSnapshot,
+    Claim,
+    ClaimEvidence
 };

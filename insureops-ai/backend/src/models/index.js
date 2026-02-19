@@ -1,4 +1,4 @@
-const { Trace, LLMCall, ToolCall, GuardrailCheck, AlertRule, Alert, MetricsSnapshot } = require('./models');
+const { Trace, LLMCall, ToolCall, GuardrailCheck, AlertRule, Alert, MetricsSnapshot, Claim, ClaimEvidence } = require('./models');
 
 // ─── Associations ─────────────────────────────────────
 
@@ -18,6 +18,16 @@ GuardrailCheck.belongsTo(Trace, { foreignKey: 'trace_id', as: 'trace' });
 AlertRule.hasMany(Alert, { foreignKey: 'rule_id', as: 'alerts', onDelete: 'SET NULL' });
 Alert.belongsTo(AlertRule, { foreignKey: 'rule_id', as: 'rule' });
 
+// ─── v2 Associations ─────────────────────────────────
+
+// Claim → ClaimEvidence (one-to-many)
+Claim.hasMany(ClaimEvidence, { foreignKey: 'claim_id', as: 'evidence', onDelete: 'CASCADE' });
+ClaimEvidence.belongsTo(Claim, { foreignKey: 'claim_id', as: 'claim' });
+
+// Claim → Trace (one-to-one: a claim produces one trace)
+Claim.hasOne(Trace, { foreignKey: 'claim_id', as: 'trace' });
+Trace.belongsTo(Claim, { foreignKey: 'claim_id', as: 'claim' });
+
 module.exports = {
     Trace,
     LLMCall,
@@ -25,5 +35,7 @@ module.exports = {
     GuardrailCheck,
     AlertRule,
     Alert,
-    MetricsSnapshot
+    MetricsSnapshot,
+    Claim,
+    ClaimEvidence
 };

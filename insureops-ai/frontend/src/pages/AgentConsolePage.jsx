@@ -65,6 +65,8 @@ const AgentConsolePage = () => {
                 toolsUsed: response.toolsUsed || [],
                 traceId: response.traceId,
                 totalTokens: response.totalTokens,
+                verification: response.details?.verification,
+                evidenceAnalysis: response.details?.evidence_analysis,
             });
         } catch (err) {
             console.error('Agent error:', err);

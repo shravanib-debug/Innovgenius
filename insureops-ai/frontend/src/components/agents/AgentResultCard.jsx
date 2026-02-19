@@ -56,6 +56,80 @@ const AgentResultCard = ({ result }) => {
                 </div>
             )}
 
+            {/* Verification & Risk Analysis (Phase 4) */}
+            {result.verification && (
+                <div className="space-y-3">
+                    <p className="text-xs text-[#7a6550] uppercase tracking-wider mb-2 flex items-center gap-2">
+                        Verification Checks
+                        {result.verification.verified ? (
+                            <span className="text-[#22c55e] bg-[#22c55e]/10 px-1.5 py-0.5 rounded text-[10px]">VERIFIED</span>
+                        ) : (
+                            <span className="text-[#e8722a] bg-[#e8722a]/10 px-1.5 py-0.5 rounded text-[10px]">FLAGGED</span>
+                        )}
+                    </p>
+
+                    {/* Steps Checklist */}
+                    <div className="bg-[#0f0d0b] rounded-lg p-3 space-y-2">
+                        {result.verification.verification_steps?.map((step, idx) => (
+                            <div key={idx} className="flex items-start gap-3">
+                                {step.passed ? (
+                                    <CheckCircle size={14} className="text-[#22c55e] mt-0.5 shrink-0" />
+                                ) : (
+                                    <AlertTriangle size={14} className="text-[#e8722a] mt-0.5 shrink-0" />
+                                )}
+                                <div>
+                                    <p className={`text-sm font-medium ${step.passed ? 'text-[#f1ebe4]' : 'text-[#e8722a]'}`}>
+                                        {step.name}
+                                    </p>
+                                    <p className="text-xs text-[#7a6550]">{step.details}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Extracted Evidence Summary */}
+                    {result.evidenceAnalysis && result.evidenceAnalysis.length > 0 && (
+                        <div className="pt-2">
+                            <p className="text-[10px] text-[#7a6550] uppercase tracking-wider mb-2">AI Evidence Analysis</p>
+                            <div className="flex gap-2 overflow-x-auto pb-1">
+                                {result.evidenceAnalysis.map((file, idx) => {
+                                    const isImage = file.file_path && file.file_path.match(/\.(jpg|jpeg|png|webp)$/i);
+                                    const docType = file.doc_type || file.document_type || "Unknown Doc";
+
+                                    return (
+                                        <div key={idx} className="bg-[#0f0d0b] border border-[#2a201a] rounded-lg p-2 min-w-[140px] flex flex-col gap-2 relative group hover:border-[#e8722a]/50 transition-colors">
+                                            <div className="h-20 w-full bg-[#1c1815] rounded overflow-hidden flex items-center justify-center">
+                                                {isImage ? (
+                                                    <img
+                                                        src={`/uploads/${file.file_path}`}
+                                                        alt={docType}
+                                                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                                    />
+                                                ) : (
+                                                    <div className="text-[#5a4a3a] text-xs font-mono">PDF / DOC</div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-[#e8722a] font-bold uppercase truncate">{docType}</p>
+                                                <p className="text-[10px] text-[#a89888] truncate">{file.file_path}</p>
+                                            </div>
+
+                                            {/* Authenticity Badge */}
+                                            {file.authenticity_score !== undefined && (
+                                                <div className={`absolute top-1 right-1 px-1 py-0.5 rounded text-[9px] font-bold ${file.authenticity_score > 0.8 ? 'bg-[#22c55e]/20 text-[#22c55e]' : 'bg-[#eab308]/20 text-[#eab308]'
+                                                    }`}>
+                                                    {(file.authenticity_score * 100).toFixed(0)}% Auth
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-3">
                 <div className="bg-[#0f0d0b] rounded-lg p-3 text-center">

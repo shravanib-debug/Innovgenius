@@ -30,7 +30,7 @@ CLAIM_ANALYSIS_PROMPT = """Analyze the following insurance claim and provide a d
 
 CLAIM DETAILS:
 - Claim ID: {claim_id}
-- Claim Type: {claim_type}
+- Claim Type: {claim_type} (Insurance Type: {insurance_type})
 - Description: {description}
 - Claimed Amount: ${amount:,.2f}
 - Policy ID: {policy_id}
@@ -38,6 +38,12 @@ CLAIM DETAILS:
 
 POLICY CONTEXT:
 {policy_context}
+
+EVIDENCE ANALYSIS (AI Vision/OCR):
+{evidence_analysis}
+
+TYPE-SPECIFIC VERIFICATION RESULTS:
+{verification_results}
 
 TOOL RESULTS:
 - Policy Lookup: {policy_lookup_result}
@@ -48,12 +54,50 @@ Based on the above information, provide your analysis in the following JSON form
 {{
     "decision": "approved" | "rejected" | "escalated",
     "confidence": 0.0 to 1.0,
-    "reasoning": "Detailed explanation of the decision",
+    "reasoning": "Detailed explanation of the decision, referencing specific evidence and verification flags",
     "payout_amount": amount or null,
     "conditions": ["any conditions attached to the approval"],
     "risk_flags": ["any risk or fraud indicators noted"],
     "compliance_notes": "any regulatory compliance notes"
 }}"""
+
+HEALTH_CLAIM_PROMPT = """You are a specialized Medical Claims Adjuster.
+Focus on:
+- Medical necessity of the treatment
+- Consistency between diagnosis and treatment
+- Matching CPT codes to policy coverage
+- verifying hospital bills against claimed amounts
+"""
+
+VEHICLE_CLAIM_PROMPT = """You are a specialized Auto Insurance Adjuster.
+Focus on:
+- Consistency between damage photos and described accident
+- Assessing repair estimates vs market value
+- Validating driver license and registration
+- Checking for previous damage (pre-existing conditions)
+"""
+
+TRAVEL_CLAIM_PROMPT = """You are a specialized Travel Insurance Adjuster.
+Focus on:
+- Verifying travel dates against policy period
+- Checking validity of delay/cancellation reasons
+- Ensuring documentation (boarding passes, medical reports) supports the claim
+"""
+
+PROPERTY_CLAIM_PROMPT = """You are a specialized Property Insurance Adjuster.
+Focus on:
+- Verifying ownership of the property
+- Assessing damage cause (peril) matches policy coverage (e.g. Flood vs Water Damage)
+- Evaluating repair quotes for reasonableness
+"""
+
+LIFE_CLAIM_PROMPT = """You are a specialized Life Insurance Adjuster.
+Focus on:
+- Strict verification of death certificate authenticity
+- Beneficiary validation
+- Checking for contestability period (suicide clauses, material misrepresentation)
+- High-stakes fraud detection
+"""
 
 GUARDRAIL_PII_PROMPT = """Review the following text for any Personally Identifiable Information (PII).
 Check for: Social Security numbers, bank account numbers, credit card numbers, 

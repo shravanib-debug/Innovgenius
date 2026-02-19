@@ -168,9 +168,69 @@ async function runAgent(agentType, inputData, models) {
 
     switch (agentType) {
         case 'claims':
-            systemPrompt = CLAIMS_SYSTEM_PROMPT;
-            userPrompt = buildClaimsPrompt(inputData);
-            toolNames = ['policy_lookup', 'coverage_checker', 'payout_calculator', 'fraud_screen'];
+            // Phase 4: Call Python Agent
+            try {
+                const { spawn } = require('child_process');
+                const path = require('path');
+
+                // Construct payload
+                const payload = JSON.stringify(inputData);
+
+                // Path to root directory (where agents module is)
+                const rootDir = path.resolve(__dirname, '../../../');
+
+                return new Promise((resolve, reject) => {
+                    const pythonProcess = spawn('python', ['-m', 'agents.claims_agent.agent', '--payload', payload], {
+                        cwd: rootDir,
+                        env: { ...process.env, PYTHONPATH: rootDir }
+                    });
+
+                    let stdoutData = '';
+                    let stderrData = '';
+
+                    pythonProcess.stdout.on('data', (data) => {
+                        stdoutData += data.toString();
+                    });
+
+                    pythonProcess.stderr.on('data', (data) => {
+                        stderrData += data.toString();
+                        console.error(`[Python Log]: ${data.toString().trim()}`);
+                    });
+
+                    pythonProcess.on('close', (code) => {
+                        if (code !== 0) {
+                            console.error(`Python agent exited with code ${code}`);
+                            resolve({ success: false, error: "Agent process failed", details: stderrData });
+                            return;
+                        }
+
+                        try {
+                            // Extract JSON from output (between markers if present, or just parse)
+                            let jsonStr = stdoutData;
+                            if (stdoutData.includes('__JSON_START__')) {
+                                jsonStr = stdoutData.split('__JSON_START__')[1].split('__JSON_END__')[0];
+                            }
+                            const result = JSON.parse(jsonStr.trim());
+                            resolve({
+                                success: true,
+                                decision: result.decision?.decision_type,
+                                confidence: result.decision?.confidence,
+                                reasoning: result.decision?.reasoning,
+                                traceId: result.trace_id,
+                                details: result
+                            });
+                        } catch (e) {
+                            console.error("Failed to parse Python agent output:", e);
+                            resolve({ success: false, error: "Invalid agent output", details: stdoutData });
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error("Failed to spawn python agent:", error);
+                // Fallback to simulation if python fails?
+                // For now, return error to surface the issue.
+                throw error;
+            }
             break;
         case 'underwriting':
             systemPrompt = UNDERWRITING_SYSTEM_PROMPT;
