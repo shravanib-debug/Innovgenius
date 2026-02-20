@@ -13,7 +13,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000   # Render assigns port via $PORT
+        value: 5000
       - key: DATABASE_URL
         sync: false     # Set your Neon connection string in the Render dashboard
       - key: OPENROUTER_API_KEY

@@ -33,6 +33,8 @@ COPY backend/ /app/backend/
 # The server.js reads .env from the parent directory
 COPY .env* /app/
 
+ENV PYTHONPATH=/app
+ENV PORT=5000
 EXPOSE 5000
 
 # ── Start the Express server ─────────────────────────────

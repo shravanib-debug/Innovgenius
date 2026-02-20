@@ -25,6 +25,8 @@ const config = {
     // LLM API Keys
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     openaiApiKey: process.env.OPENAI_API_KEY || '',
+    openrouterApiKey: process.env.OPENROUTER_API_KEY || '',
+    openrouterModel: process.env.OPENROUTER_MODEL || 'openai/gpt-4o-mini',
 
     // WebSocket
     wsPort: parseInt(process.env.WS_PORT, 10) || 5000
