@@ -8,6 +8,7 @@ const { callLLM, MODEL } = require('./llmService');
 const traceService = require('./traceService');
 const metricsService = require('./metricsService');
 const { evaluateAlerts } = require('../core/alertEngine');
+const { runComplianceCheck } = require('../core/complianceEngine');
 const wsManager = require('../websocket');
 
 // ─── System Prompts ─────────────────────────────────────
@@ -250,6 +251,14 @@ async function runAgent(agentType, inputData, models) {
                                     metricsService.invalidateCache();
                                     await evaluateAlerts(trace, models);
                                     wsManager.broadcastTrace(trace);
+
+                                    // Run compliance check
+                                    try {
+                                        await runComplianceCheck(trace, models);
+                                        console.log(`🛡️  Compliance check complete: ${trace.id}`);
+                                    } catch (compErr) {
+                                        console.error('Compliance check failed:', compErr.message);
+                                    }
                                     console.log(`✅ Trace saved: ${trace.id}`);
                                 } catch (dbError) {
                                     console.error('Failed to store claims trace:', dbError.message);
@@ -391,6 +400,14 @@ async function runAgent(agentType, inputData, models) {
 
             // Broadcast to WebSocket clients
             wsManager.broadcastTrace(trace);
+
+            // Run compliance check
+            try {
+                await runComplianceCheck(trace, models);
+                console.log(`🛡️  Compliance check complete: ${trace.id}`);
+            } catch (compErr) {
+                console.error('Compliance check failed:', compErr.message);
+            }
         } catch (dbError) {
             console.error('Failed to store trace:', dbError.message);
         }

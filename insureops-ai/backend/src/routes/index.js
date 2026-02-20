@@ -12,6 +12,7 @@ const alertsRoutes = require('./alerts');
 const telemetryRoutes = require('./telemetry');
 const claimsRoutes = require('./claims');
 const evidenceRoutes = require('./evidence');
+const complianceRoutes = require('./compliance');
 
 function registerRoutes(app) {
     // ─── Static file serving for evidence uploads ────
@@ -25,6 +26,7 @@ function registerRoutes(app) {
     app.use('/api/telemetry', telemetryRoutes);
     app.use('/api/claims', claimsRoutes);
     app.use('/api/claims/:id/evidence', evidenceRoutes);
+    app.use('/api/compliance', complianceRoutes);
 
     console.log('🛤️  API routes registered:');
     console.log('   /api/metrics     — Dashboard metrics');
@@ -35,6 +37,7 @@ function registerRoutes(app) {
     console.log('   /api/claims      — Claims CRUD (v2)');
     console.log('   /api/claims/:id/evidence — Evidence upload (v2)');
     console.log('   /uploads         — Static evidence files');
+    console.log('   /api/compliance  — Safety & compliance monitoring');
 }
 
 module.exports = { registerRoutes };

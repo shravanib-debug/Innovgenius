@@ -499,6 +499,72 @@ const ClaimEvidence = sequelize.define('ClaimEvidence', {
     underscored: true
 });
 
+// ─── Compliance Event Model ──────────────────────────
+const ComplianceEvent = sequelize.define('ComplianceEvent', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    trace_id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: { model: 'traces', key: 'id' }
+    },
+    agent_type: {
+        type: DataTypes.STRING(20),
+        allowNull: false
+    },
+    // PII Detection
+    pii_clean: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
+    pii_risk_level: {
+        type: DataTypes.ENUM('none', 'medium', 'high', 'critical'),
+        defaultValue: 'none'
+    },
+    pii_exposures: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    pii_findings: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    },
+    // Policy Compliance
+    policy_compliance_rate: {
+        type: DataTypes.INTEGER,
+        defaultValue: 100
+    },
+    policy_violations: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    },
+    policy_rules_checked: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    policy_rules_passed: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
+    },
+    // Audit
+    audit_record: {
+        type: DataTypes.JSONB,
+        allowNull: true
+    },
+    // Overall
+    overall_status: {
+        type: DataTypes.ENUM('compliant', 'review', 'warning', 'critical'),
+        defaultValue: 'compliant'
+    }
+}, {
+    tableName: 'compliance_events',
+    timestamps: true,
+    underscored: true
+});
+
 module.exports = {
     Trace,
     LLMCall,
@@ -508,5 +574,7 @@ module.exports = {
     Alert,
     MetricsSnapshot,
     Claim,
-    ClaimEvidence
+    ClaimEvidence,
+    ComplianceEvent
 };
+
