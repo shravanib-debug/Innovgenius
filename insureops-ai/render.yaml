@@ -1,0 +1,24 @@
+# render.yaml — Render Blueprint
+# Uses Docker runtime to support both Node.js and Python (for Claims Agent)
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: insureops-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000   # Render assigns port via $PORT
+      - key: DATABASE_URL
+        sync: false     # Set your Neon connection string in the Render dashboard
+      - key: OPENROUTER_API_KEY
+        sync: false     # Set your OpenRouter API key in the Render dashboard
+      - key: OPENROUTER_MODEL
+        value: openai/gpt-4o-mini
+      - key: FRONTEND_URL
+        sync: false     # Set to your Vercel URL (e.g. https://insureops-ai.vercel.app)
