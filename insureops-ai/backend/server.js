@@ -19,7 +19,7 @@ const server = createServer(app);
 app.use(helmet());
 const allowedOrigins = config.frontendUrl
     .split(',')
-    .map(s => s.trim())
+    .map(s => s.trim().replace(/\/+$/, ''))
     .filter(Boolean);
 
 app.use(cors({

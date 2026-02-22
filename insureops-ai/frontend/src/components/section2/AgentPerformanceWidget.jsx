@@ -1,29 +1,28 @@
 import { motion } from 'framer-motion';
-import { LineChart, Line, ResponsiveContainer } from 'recharts';
 
-const mockAgents = [
-    { name: 'Claims Agent', type: 'claims', completion: 96.2, success: 91.5, sla: 94.8, sparkline: [88, 90, 91, 89, 92, 91, 93, 92, 91], status: 'green' },
-    { name: 'Underwriting Agent', type: 'underwriting', completion: 94.8, success: 89.2, sla: 92.1, sparkline: [85, 87, 88, 86, 89, 90, 88, 89, 90], status: 'green' },
-    { name: 'Fraud Agent', type: 'fraud', completion: 98.1, success: 85.4, sla: 88.5, sparkline: [82, 84, 83, 85, 86, 84, 85, 86, 85], status: 'yellow' },
-    { name: 'Support Agent', type: 'support', completion: 92.3, success: 87.9, sla: 90.2, sparkline: [86, 85, 87, 88, 86, 87, 88, 89, 88], status: 'green' },
-];
+const AGENT_LABELS = {
+    claims: 'Claims Agent',
+    underwriting: 'Underwriting Agent',
+    fraud: 'Fraud Agent',
+    support: 'Support Agent',
+};
 
 const statusColors = { green: '#22c55e', yellow: '#eab308', red: '#ef4444' };
 
 const AgentPerformanceWidget = ({ data, loading }) => {
-    // If we have real data from API, merge with mock display
-    const agents = mockAgents.map(mock => {
-        const real = data?.[mock.type];
-        if (!real) return mock;
+    // Build agent list purely from API data
+    const agentTypes = ['claims', 'underwriting', 'fraud', 'support'];
+    const agents = agentTypes.map(type => {
+        const real = data?.[type];
+        if (!real) return { name: AGENT_LABELS[type], type, success: 0, avgLatency: 0, avgCost: 0, totalTraces: 0, status: 'green' };
         return {
-            ...mock,
-            success: real.successRate ?? mock.success,
-            sla: real.avgLatency ? (real.avgLatency < 5000 ? 95 : 80) : mock.sla,
-            completion: real.totalTraces > 0 ? 100 : mock.completion,
+            name: AGENT_LABELS[type],
+            type,
+            success: real.successRate ?? 0,
+            avgLatency: real.avgLatency ?? 0,
+            avgCost: real.avgCost ?? 0,
+            totalTraces: real.totalTraces ?? 0,
             status: (real.successRate ?? 100) >= 90 ? 'green' : (real.successRate ?? 100) >= 80 ? 'yellow' : 'red',
-            avgLatency: real.avgLatency,
-            avgCost: real.avgCost,
-            totalTraces: real.totalTraces,
         };
     });
 

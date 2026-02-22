@@ -72,10 +72,6 @@ const EvidenceCompletenessWidget = ({ data, loading }) => {
 
     // Mock data if no scores
     const hasData = gauges.some(g => g.score > 0);
-    if (!hasData && !loading) {
-        const mockScores = { health: 0.82, vehicle: 0.75, travel: 0.68, property: 0.88, life: 0.71 };
-        gauges.forEach(g => { g.score = mockScores[g.type]; });
-    }
 
     const avgScore = gauges.length > 0
         ? gauges.reduce((sum, g) => sum + (g.score > 1 ? g.score / 100 : g.score), 0) / gauges.length

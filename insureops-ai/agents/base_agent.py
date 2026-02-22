@@ -90,27 +90,92 @@ def calculate_cost(prompt_tokens: int, completion_tokens: int, model: str = "ope
 
 
 def calculate_prompt_quality(prompt_text: str) -> float:
-    """Estimate prompt quality score (0-1) based on structure and content."""
-    score = 0.5  # Base score
+    """Estimate prompt quality score (0-1) based on structure, content, and data richness.
+    
+    Scores are computed from:
+      - Template structure (persona, formatting, output instructions)  → up to 0.45
+      - Data completeness (how many fields are filled vs N/A/empty)    → up to 0.30
+      - Context richness (evidence, policy text, tool results present) → up to 0.25
+    """
+    import re
 
-    # Length check (good prompts are 100-2000 chars)
+    prompt_lower = prompt_text.lower()
     length = len(prompt_text)
+
+    # ─── 1. Template Structure Score (max 0.45) ─────────────
+    structure_score = 0.15  # Base: a prompt exists at all
+
+    # Length bonus
     if 100 <= length <= 2000:
-        score += 0.15
+        structure_score += 0.08
     elif length > 2000:
-        score += 0.10
+        structure_score += 0.05
 
-    # Structure indicators
-    if any(marker in prompt_text.lower() for marker in ['you are', 'your role', 'as a']):
-        score += 0.1  # Has persona
-    if any(marker in prompt_text.lower() for marker in ['step', '1.', '- ', 'first']):
-        score += 0.1  # Has structure
-    if any(marker in prompt_text.lower() for marker in ['output', 'respond', 'return', 'format']):
-        score += 0.1  # Has output instructions
-    if any(marker in prompt_text.lower() for marker in ['context:', 'given:', 'based on']):
-        score += 0.05  # Has context section
+    # Persona indicators
+    if any(m in prompt_lower for m in ['you are', 'your role', 'as a', 'you must']):
+        structure_score += 0.06
 
-    return min(score, 1.0)
+    # Structured formatting (lists, numbered steps)
+    if any(m in prompt_lower for m in ['step', '1.', '- ', 'first', '###', '───']):
+        structure_score += 0.06
+
+    # Output format instructions
+    if any(m in prompt_lower for m in ['output', 'respond', 'return', 'format', 'json']):
+        structure_score += 0.06
+
+    # Context anchoring
+    if any(m in prompt_lower for m in ['context:', 'given:', 'based on', 'provided']):
+        structure_score += 0.04
+
+    structure_score = min(structure_score, 0.45)
+
+    # ─── 2. Data Completeness Score (max 0.30) ──────────────
+    # Check how many data fields are actually filled vs placeholder/empty
+    na_count = prompt_lower.count('n/a') + prompt_lower.count('not provided') + prompt_lower.count('unknown')
+    empty_json = prompt_lower.count('{}') + prompt_lower.count('[]') + prompt_lower.count('null')
+    placeholder_count = na_count + empty_json
+
+    # Count data fields that have real values (dollar amounts, IDs, dates, numbers)
+    real_data_indicators = (
+        len(re.findall(r'\$[\d,]+', prompt_text)) +          # Dollar amounts
+        len(re.findall(r'[A-Z]{2,}-\d+', prompt_text)) +     # IDs like CLM-001, POL-123
+        len(re.findall(r'\d{4}-\d{2}-\d{2}', prompt_text)) + # Dates
+        len(re.findall(r'(?:section|clause)\s+[\d.]+', prompt_lower))  # Section refs
+    )
+
+    if placeholder_count == 0 and real_data_indicators >= 3:
+        data_score = 0.30       # Fully populated prompt
+    elif placeholder_count <= 2 and real_data_indicators >= 2:
+        data_score = 0.22       # Mostly populated
+    elif placeholder_count <= 4:
+        data_score = 0.15       # Partially populated
+    else:
+        data_score = 0.05       # Many missing fields
+
+    # ─── 3. Context Richness Score (max 0.25) ────────────────
+    context_score = 0.0
+
+    # Has policy/evidence/tool data injected (not just template placeholders)
+    if length > 3000:
+        context_score += 0.08   # Substantial data injected
+    elif length > 1000:
+        context_score += 0.04
+
+    # Evidence analysis present
+    if 'evidence' in prompt_lower and '"file_path"' in prompt_lower:
+        context_score += 0.06
+
+    # Policy text present (not just placeholder)
+    if 'policy' in prompt_lower and length > 2000:
+        context_score += 0.06
+
+    # Tool results present
+    if any(m in prompt_lower for m in ['tool result', 'coverage check', 'payout', 'risk score']):
+        context_score += 0.05
+
+    context_score = min(context_score, 0.25)
+
+    return min(round(structure_score + data_score + context_score, 3), 1.0)
 
 
 class Timer:

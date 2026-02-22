@@ -18,6 +18,8 @@ services:
         sync: false     # Set your Neon connection string in the Render dashboard
       - key: OPENROUTER_API_KEY
         sync: false     # Set your OpenRouter API key in the Render dashboard
+      - key: JWT_SECRET
+        sync: false     # Set a secure random string for JWT token signing in the Render dashboard
       - key: OPENROUTER_MODEL
         value: openai/gpt-4o-mini
       - key: FRONTEND_URL

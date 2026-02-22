@@ -1,25 +1,14 @@
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
-const mockData = [
-    { time: 'Mon', claims: 92, underwriting: 88, fraud: 85 },
-    { time: 'Tue', claims: 89, underwriting: 90, fraud: 83 },
-    { time: 'Wed', claims: 91, underwriting: 87, fraud: 86 },
-    { time: 'Thu', claims: 88, underwriting: 91, fraud: 82 },
-    { time: 'Fri', claims: 93, underwriting: 89, fraud: 88 },
-    { time: 'Sat', claims: 90, underwriting: 92, fraud: 84 },
-    { time: 'Sun', claims: 94, underwriting: 90, fraud: 87 },
-];
-
 const ResponseAccuracyWidget = ({ data, loading }) => {
-    // Use API data if available: { byAgent: { claims: 92, underwriting: 88, fraud: 90 }, overall: 91 }
-    const overall = data?.overall ?? 91;
-    const byAgent = data?.byAgent || { claims: 92, underwriting: 88, fraud: 90 };
+    const overall = data?.overall ?? 0;
+    const byAgent = data?.byAgent || {};
 
-    // Build chart data from API or mock
-    const chartData = data?.byAgent
+    // Build chart data from API data — single point per agent
+    const chartData = Object.keys(byAgent).length > 0
         ? [{ time: 'Current', claims: byAgent.claims || 0, underwriting: byAgent.underwriting || 0, fraud: byAgent.fraud || 0 }]
-        : mockData;
+        : [];
 
     return (
         <motion.div

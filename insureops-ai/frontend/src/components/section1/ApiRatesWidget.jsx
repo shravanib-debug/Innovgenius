@@ -1,19 +1,12 @@
 import { motion } from 'framer-motion';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
-const mockBreakdown = [
-    { type: 'Timeout', count: 12, fill: '#eab308' },
-    { type: '4xx', count: 8, fill: '#e8722a' },
-    { type: '5xx', count: 5, fill: '#ef4444' },
-    { type: 'Rate Limit', count: 3, fill: '#3b82f6' },
-];
-
 const COLORS = ['#22c55e', '#ef4444'];
 
 const ApiRatesWidget = ({ data, loading }) => {
-    const success = data?.success ?? 235;
-    const failure = data?.failure ?? 14;
-    const successRate = data?.successRate ?? 94;
+    const success = data?.success ?? 0;
+    const failure = data?.failure ?? 0;
+    const successRate = data?.successRate ?? 0;
 
     const donutData = [
         { name: 'Success', value: successRate },

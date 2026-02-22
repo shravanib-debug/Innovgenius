@@ -331,7 +331,25 @@ def run_underwriting_agent(applicant_data: dict, send_telemetry: bool = True) ->
 
 
 if __name__ == "__main__":
-    applicants = load_json_data("sample_applicants.json")
-    result = run_underwriting_agent(applicants[0], send_telemetry=False)
-    print(f"\n📋 Full Result:")
-    print(json.dumps(result["decision"], indent=2))
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--payload", help="JSON string of applicant data")
+    args = parser.parse_args()
+
+    if args.payload:
+        try:
+            applicant_data = json.loads(args.payload)
+            result = run_underwriting_agent(applicant_data, send_telemetry=True)
+
+            # Output ONLY valid JSON between markers for Node.js to parse
+            print("__JSON_START__")
+            print(json.dumps(result))
+            print("__JSON_END__")
+        except Exception as e:
+            print(json.dumps({"error": str(e)}))
+    else:
+        # Default: run with sample data for testing
+        applicants = load_json_data("sample_applicants.json")
+        result = run_underwriting_agent(applicants[0], send_telemetry=False)
+        print(f"\n📋 Full Result:")
+        print(json.dumps(result["decision"], indent=2))

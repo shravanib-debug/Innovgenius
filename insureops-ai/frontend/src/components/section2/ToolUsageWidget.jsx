@@ -3,15 +3,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 
 const toolColors = ['#e8722a', '#f2923c', '#3b82f6', '#60a5fa', '#22c55e', '#4ade80', '#eab308', '#fbbf24', '#ef4444', '#a855f7'];
 
-const mockToolData = [
-    { name: 'policy_lookup', calls: 342, success: 98 },
-    { name: 'coverage_checker', calls: 298, success: 97 },
-    { name: 'payout_calculator', calls: 256, success: 99 },
-    { name: 'risk_score_calc', calls: 189, success: 96 },
-    { name: 'duplicate_checker', calls: 312, success: 94 },
-    { name: 'pattern_analyzer', calls: 284, success: 92 },
-];
-
 const ToolUsageWidget = ({ data, loading }) => {
     // Transform API data: { tool_name: { count, successCount, avgDuration, successRate } }
     const toolFrequency = data && Object.keys(data).length > 0
@@ -22,7 +13,7 @@ const ToolUsageWidget = ({ data, loading }) => {
             avgMs: info.avgDuration ?? 0,
             fill: toolColors[i % toolColors.length],
         })).sort((a, b) => b.calls - a.calls)
-        : mockToolData.map((t, i) => ({ ...t, fill: toolColors[i % toolColors.length] }));
+        : [];
 
     return (
         <motion.div

@@ -8,6 +8,7 @@ import {
 import { getTraceDetail } from '../services/api';
 import { useApiData } from '../hooks/useApiData';
 import VerificationPanel from '../components/traces/VerificationPanel';
+import DecisionTrail from '../components/traces/DecisionTrail';
 
 const decisionConfig = {
     approved: { icon: CheckCircle, color: '#22c55e', bg: 'bg-[#22c55e]/10', border: 'border-[#22c55e]/30' },
@@ -116,6 +117,9 @@ const TraceDetailPage = () => {
                     <p className="text-sm text-[#c8b8a8] leading-relaxed">{trace.reasoning}</p>
                 </div>
             )}
+
+            {/* Explainable AI Decision Trail */}
+            <DecisionTrail trace={trace} />
 
             {/* Execution Timeline */}
             {trace.timeline && trace.timeline.length > 0 && (

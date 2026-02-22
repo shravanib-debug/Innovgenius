@@ -96,7 +96,7 @@ async function getSection1Metrics(models, timerange = '24h') {
         const promptScores = allLLMCalls.map(c => parseFloat(c.prompt_quality) || 0).filter(s => s > 0);
         const avgPromptQuality = promptScores.length > 0
             ? Math.round((promptScores.reduce((a, b) => a + b, 0) / promptScores.length) * 100)
-            : 85;
+            : 0;
 
         // Prompt quality trend (group by hour)
         const promptTrend = _groupByHour(allLLMCalls, 'created_at', c => parseFloat(c.prompt_quality) || 0);
@@ -432,24 +432,24 @@ function _fallbackOverview() {
 
 function _fallbackSection1() {
     return {
-        promptQuality: { score: 85, trend: [] },
-        responseAccuracy: { byAgent: { claims: 92, underwriting: 88, fraud: 90, support: 95 }, overall: 91 },
-        latency: { p50: 800, p95: 2500, p99: 4000, avg: 1200, trend: [], slaBreach: false },
-        apiRates: { success: 0, failure: 0, successRate: 100 },
+        promptQuality: { score: 0, trend: [] },
+        responseAccuracy: { byAgent: {}, overall: 0 },
+        latency: { p50: 0, p95: 0, p99: 0, avg: 0, trend: [], slaBreach: false },
+        apiRates: { success: 0, failure: 0, successRate: 0 },
         cost: { total: 0, byAgent: {}, trend: [], avgPerRequest: 0 },
-        drift: { score: 0.05, status: 'normal' },
+        drift: { score: 0, status: 'normal' },
         timerange: '24h', traceCount: 0
     };
 }
 
 function _fallbackInsuranceType() {
     return {
-        distribution: { health: 12, vehicle: 9, travel: 7, property: 5, life: 3 },
-        latencyByType: { health: 1200, vehicle: 950, travel: 1450, property: 1100, life: 800 },
-        completenessByType: { health: 0.82, vehicle: 0.75, travel: 0.68, property: 0.88, life: 0.71 },
-        escalationByType: { health: 8, vehicle: 12, travel: 15, property: 6, life: 18 },
-        valueByType: { health: 45000, vehicle: 38000, travel: 12000, property: 95000, life: 150000 },
-        totalClaims: 36,
+        distribution: { health: 0, vehicle: 0, travel: 0, property: 0, life: 0 },
+        latencyByType: { health: 0, vehicle: 0, travel: 0, property: 0, life: 0 },
+        completenessByType: { health: 0, vehicle: 0, travel: 0, property: 0, life: 0 },
+        escalationByType: { health: 0, vehicle: 0, travel: 0, property: 0, life: 0 },
+        valueByType: { health: 0, vehicle: 0, travel: 0, property: 0, life: 0 },
+        totalClaims: 0,
         timerange: '24h'
     };
 }

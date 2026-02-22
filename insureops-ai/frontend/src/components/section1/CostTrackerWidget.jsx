@@ -1,26 +1,16 @@
 import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const mockCostData = [
-    { time: 'Mon', claims: 8.50, underwriting: 5.20, fraud: 6.80 },
-    { time: 'Tue', claims: 9.10, underwriting: 4.90, fraud: 7.30 },
-    { time: 'Wed', claims: 7.80, underwriting: 6.10, fraud: 5.90 },
-    { time: 'Thu', claims: 10.20, underwriting: 5.50, fraud: 8.10 },
-    { time: 'Fri', claims: 8.90, underwriting: 6.30, fraud: 6.40 },
-    { time: 'Sat', claims: 6.50, underwriting: 3.80, fraud: 4.20 },
-    { time: 'Sun', claims: 5.80, underwriting: 3.20, fraud: 3.90 },
-];
-
 const CostTrackerWidget = ({ data, loading }) => {
     const totalCost = data?.total ?? 0;
     const avgPerReq = data?.avgPerRequest ?? 0;
     const byAgent = data?.byAgent || {};
     const trend = data?.trend || [];
 
-    // Build cost data for chart
+    // Build cost data for chart from API trend
     const chartData = trend.length > 0
         ? trend.map(t => ({ time: t.time?.split('T')[1]?.slice(0, 5) || t.time, cost: t.value }))
-        : mockCostData;
+        : [];
 
     const budget = 50;
     const budgetUsage = Math.min((totalCost / budget) * 100, 100);

@@ -334,9 +334,26 @@ def run_fraud_agent(claim_data: dict, send_telemetry: bool = True) -> dict:
 
 
 if __name__ == "__main__":
-    claims = load_json_data("sample_claims.json")
-    # Test with a fraud-flagged claim (CLM-014 — suspicious fire)
-    fraud_claim = next((c for c in claims if c["id"] == "CLM-014"), claims[0])
-    result = run_fraud_agent(fraud_claim, send_telemetry=False)
-    print(f"\n📋 Full Result:")
-    print(json.dumps(result["decision"], indent=2))
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--payload", help="JSON string of claim data")
+    args = parser.parse_args()
+
+    if args.payload:
+        try:
+            claim_data = json.loads(args.payload)
+            result = run_fraud_agent(claim_data, send_telemetry=True)
+
+            # Output ONLY valid JSON between markers for Node.js to parse
+            print("__JSON_START__")
+            print(json.dumps(result))
+            print("__JSON_END__")
+        except Exception as e:
+            print(json.dumps({"error": str(e)}))
+    else:
+        # Default: run with sample data for testing
+        claims = load_json_data("sample_claims.json")
+        fraud_claim = next((c for c in claims if c["id"] == "CLM-014"), claims[0])
+        result = run_fraud_agent(fraud_claim, send_telemetry=False)
+        print(f"\n📋 Full Result:")
+        print(json.dumps(result["decision"], indent=2))

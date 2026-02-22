@@ -12,10 +12,23 @@ const api = axios.create({
 api.interceptors.response.use(
     (res) => res,
     (error) => {
+        // Auto-logout on 401 (except for auth endpoints)
+        if (error?.response?.status === 401 && !error.config?.url?.includes('/auth/')) {
+            localStorage.removeItem('insureops_token');
+        }
         console.warn('[API Error]', error?.response?.status, error?.message);
         return Promise.reject(error);
     }
 );
+
+// Attach JWT token to every request
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('insureops_token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
 
 // ── Metrics ──────────────────────────────────
 export const getOverviewMetrics = (range = '24h') =>
@@ -79,5 +92,30 @@ export const createAlertRule = (rule) =>
 
 export const deleteAlertRule = (ruleId) =>
     api.delete(`/alerts/rules/${ruleId}`).then(r => r.data);
+// ── Compliance ───────────────────────────────
+export const getComplianceOverview = (timerange = '24h') =>
+    api.get(`/compliance/overview?timerange=${timerange}`).then(r => r.data);
+
+export const getComplianceEvents = (params = {}) =>
+    api.get('/compliance/events', { params }).then(r => r.data);
+
+export const getBiasAnalysis = (timerange = '7d') =>
+    api.get(`/compliance/bias?timerange=${timerange}`).then(r => r.data);
+
+export const getAuditLogs = (params = {}) =>
+    api.get('/compliance/audit', { params }).then(r => r.data);
+
+export const getPolicyRules = (timerange = '24h') =>
+    api.get(`/compliance/policy-rules?timerange=${timerange}`).then(r => r.data);
+
+// ── Auth ─────────────────────────────────────
+export const authRegister = (data) =>
+    api.post('/auth/register', data).then(r => r.data);
+
+export const authLogin = (data) =>
+    api.post('/auth/login', data).then(r => r.data);
+
+export const authMe = () =>
+    api.get('/auth/me').then(r => r.data);
 
 export default api;

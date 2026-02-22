@@ -3,10 +3,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 const COLORS = ['#22c55e', '#ef4444', '#eab308', '#e8722a', '#7a6550'];
 
-const mockData = { approved: 412, rejected: 186, escalated: 23, flagged: 17, other: 0 };
-
 const DecisionAccuracyWidget = ({ data, loading }) => {
-    const decisions = data || mockData;
+    const decisions = data || { approved: 0, rejected: 0, escalated: 0, flagged: 0, other: 0 };
     const total = Object.values(decisions).reduce((a, b) => a + b, 0) || 1;
 
     // For a simple accuracy view: approved + rejected are "decisive", escalated + flagged need review

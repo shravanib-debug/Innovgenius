@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, AlertTriangle, Clock, DollarSign, Search, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Clock, DollarSign, Search, ChevronLeft, ChevronRight, ExternalLink, Wifi } from 'lucide-react';
 import { getTraces } from '../services/api';
 import { useApiData } from '../hooks/useApiData';
+import { useWS } from '../contexts/WebSocketProvider';
 
 const decisionConfig = {
     approved: { icon: CheckCircle, color: 'text-[#22c55e]', bg: 'bg-[#22c55e]/10' },
@@ -33,7 +34,14 @@ const TracesPage = () => {
         decision: decisionFilter || undefined,
     }), [page, agentFilter, decisionFilter]);
 
-    const { data, loading, isLive } = useApiData(fetchFn, null, [page, agentFilter, decisionFilter]);
+    const { data, loading, isLive, refetch } = useApiData(fetchFn, null, [page, agentFilter, decisionFilter]);
+    const { subscribe, isConnected: wsConnected } = useWS();
+
+    // Auto-refresh when a new trace arrives via WebSocket
+    useEffect(() => {
+        const unsub = subscribe('new_trace', () => { refetch(); });
+        return unsub;
+    }, [subscribe, refetch]);
 
     const traces = data?.traces || [];
     const pagination = data?.pagination || { page: 1, totalPages: 1, totalItems: 0 };
@@ -64,6 +72,12 @@ const TracesPage = () => {
                         <span className="inline-flex items-center gap-1.5 mt-2 px-2 py-0.5 text-[10px] bg-green-500/10 text-green-400 border border-green-500/20 rounded-full">
                             <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
                             {pagination.totalItems} traces in DB
+                        </span>
+                    )}
+                    {wsConnected && (
+                        <span className="inline-flex items-center gap-1.5 mt-2 ml-2 px-2 py-0.5 text-[10px] bg-[#3b82f6]/10 text-[#3b82f6] border border-[#3b82f6]/20 rounded-full">
+                            <Wifi size={10} />
+                            REAL-TIME
                         </span>
                     )}
                 </div>

@@ -1,19 +1,12 @@
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const mockTrend = [
-    { time: 'Mon', count: 5 }, { time: 'Tue', count: 8 },
-    { time: 'Wed', count: 6 }, { time: 'Thu', count: 12 },
-    { time: 'Fri', count: 7 }, { time: 'Sat', count: 4 },
-    { time: 'Sun', count: 3 },
-];
-
 const EscalationWidget = ({ data, loading }) => {
-    const escalationRate = data?.escalationRate ?? 22;
+    const escalationRate = data?.escalationRate ?? 0;
     const trend = data?.escalationTrend?.map(t => ({
         time: t.time?.split('T')[1]?.slice(0, 5) || t.time,
         count: t.value
-    })) || mockTrend;
+    })) || [];
 
     return (
         <motion.div

@@ -1,15 +1,9 @@
 import { motion } from 'framer-motion';
 import { ShieldCheck, ShieldAlert, ShieldX } from 'lucide-react';
 
-const mockCompliance = {
-    pii: { passed: 1234, failed: 3 },
-    bias: { passed: 1230, failed: 7 },
-    safety: { passed: 1237, failed: 0 },
-    compliance: { passed: 1235, failed: 2 },
-};
-
 const ComplianceWidget = ({ data, loading }) => {
-    const compliance = data && Object.keys(data).length > 0 ? data : mockCompliance;
+    const defaultCompliance = { pii: { passed: 0, failed: 0 }, bias: { passed: 0, failed: 0 }, safety: { passed: 0, failed: 0 }, compliance: { passed: 0, failed: 0 } };
+    const compliance = data && Object.keys(data).length > 0 ? data : defaultCompliance;
 
     const getStatus = (item) => {
         if (item.failed > 5) return 'red';

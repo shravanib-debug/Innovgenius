@@ -1,16 +1,9 @@
 import { motion } from 'framer-motion';
 import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
 
-const mockTrend = [
-    { time: '00:00', score: 72 }, { time: '02:00', score: 75 }, { time: '04:00', score: 78 },
-    { time: '06:00', score: 74 }, { time: '08:00', score: 82 }, { time: '10:00', score: 85 },
-    { time: '12:00', score: 83 }, { time: '14:00', score: 87 }, { time: '16:00', score: 84 },
-    { time: '18:00', score: 86 }, { time: '20:00', score: 88 }, { time: '22:00', score: 85 },
-];
-
 const PromptQualityWidget = ({ data, loading }) => {
-    const score = data?.score ?? 85;
-    const trend = data?.trend?.map((t, i) => ({ time: t.time || `${i}`, score: Math.round((t.value || 0) * 100) })) || mockTrend;
+    const score = data?.score ?? 0;
+    const trend = data?.trend?.map((t, i) => ({ time: t.time || `${i}`, score: Math.round((t.value || 0) * 100) })) || [];
     const gaugeColor = score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : '#ef4444';
     const circumference = 2 * Math.PI * 52;
     const filled = (score / 100) * circumference;

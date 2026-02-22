@@ -565,6 +565,38 @@ const ComplianceEvent = sequelize.define('ComplianceEvent', {
     underscored: true
 });
 
+// ─── User Model (Auth + RBAC) ────────────────────────
+const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
+    },
+    name: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
+    email: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        unique: true,
+        validate: { isEmail: true }
+    },
+    password_hash: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    role: {
+        type: DataTypes.ENUM('operations_manager', 'compliance_officer', 'admin'),
+        allowNull: false,
+        defaultValue: 'operations_manager'
+    }
+}, {
+    tableName: 'users',
+    timestamps: true,
+    underscored: true
+});
+
 module.exports = {
     Trace,
     LLMCall,
@@ -575,6 +607,7 @@ module.exports = {
     MetricsSnapshot,
     Claim,
     ClaimEvidence,
-    ComplianceEvent
+    ComplianceEvent,
+    User
 };
 

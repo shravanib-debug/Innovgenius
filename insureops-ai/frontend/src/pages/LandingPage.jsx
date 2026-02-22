@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Play } from 'lucide-react';
+import { Play, Shield, BarChart3, Brain, Upload, Bot, Zap } from 'lucide-react';
 import { ContainerScroll } from '../components/ui/container-scroll-animation';
 
 /* ─── 4-pointed pinwheel / origami star ─── */
@@ -45,7 +45,7 @@ function LandingPage() {
     const [hoveredLink, setHoveredLink] = useState(null);
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-[#060504]">
+        <div className="min-h-screen relative overflow-x-hidden bg-[#060504]">
 
             {/* ═══════════════════════════════════════════
           BACKGROUND — Warm golden curtain glow
@@ -312,8 +312,173 @@ function LandingPage() {
                 </ContainerScroll>
             </div>
 
+            {/* Gradient bleed zone: hero → section 1 */}
+            <div className="relative z-20 h-32 -mt-8 bg-gradient-to-b from-transparent to-[#060504] pointer-events-none" />
+
             {/* ═══════════════════════════════════════════
-          DECORATIVE STARS (Floating)
+           SECTION 1 — Why InsureOps AI?
+       ═══════════════════════════════════════════ */}
+            <section className="relative z-20 pt-16 pb-28 px-8 lg:px-16 xl:px-24">
+                {/* Subtle ambient glow behind section */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(232,114,42,0.06)_0%,transparent_70%)] pointer-events-none" />
+
+                <motion.div
+                    initial={{ y: 40, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ duration: 0.7 }}
+                    className="text-center mb-16"
+                >
+                    <span className="inline-block px-4 py-1.5 rounded-full text-xs font-medium tracking-wide mb-6 bg-[rgba(232,114,42,0.08)] border border-[rgba(232,114,42,0.2)] text-[#e8a050]">
+                        Platform Capabilities
+                    </span>
+                    <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#f1ebe4] mb-4">
+                        Why{' '}
+                        <span className="italic font-normal font-serif bg-gradient-to-br from-orange-500 to-amber-300 bg-clip-text text-transparent">
+                            InsureOps AI
+                        </span>
+                        ?
+                    </h2>
+                    <p className="text-lg text-[#a89888] max-w-2xl mx-auto leading-relaxed">
+                        A next-generation platform that brings autonomous intelligence to every layer of insurance operations.
+                    </p>
+                </motion.div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    {[
+                        {
+                            icon: <Brain size={28} className="text-orange-400" />,
+                            title: 'AI-Powered Agents',
+                            desc: 'Autonomous claims processing, underwriting, and fraud detection — all driven by LLM-based agents with full traceability.',
+                        },
+                        {
+                            icon: <BarChart3 size={28} className="text-orange-400" />,
+                            title: 'Real-Time Observability',
+                            desc: 'Full-stack monitoring dashboard with traces, latency metrics, cost analytics, and agent decision logs.',
+                        },
+                        {
+                            icon: <Shield size={28} className="text-orange-400" />,
+                            title: 'Smart Risk Management',
+                            desc: 'Intelligent policy analysis with RAG-based document retrieval and automated compliance checks.',
+                        },
+                    ].map((card, i) => (
+                        <motion.div
+                            key={card.title}
+                            initial={{ y: 40, opacity: 0 }}
+                            whileInView={{ y: 0, opacity: 1 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.6, delay: i * 0.15 }}
+                            className="group p-8 rounded-2xl border border-[#a89070]/10 bg-[#13110e] hover:border-[#e8722a]/30 hover:bg-[#181410] transition-all duration-300"
+                        >
+                            <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-6 bg-gradient-to-br from-[#e8722a]/15 to-[#e8722a]/5 border border-[#e8722a]/20 group-hover:border-[#e8722a]/40 transition-colors">
+                                {card.icon}
+                            </div>
+                            <h3 className="text-xl font-semibold text-[#f1ebe4] mb-3">{card.title}</h3>
+                            <p className="text-sm leading-relaxed text-[#a89888]">{card.desc}</p>
+                        </motion.div>
+                    ))}
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════
+           SECTION 2 — How It Works
+       ═══════════════════════════════════════════ */}
+            <section className="relative z-20 py-28 px-8 lg:px-16 xl:px-24">
+                {/* Subtle ambient glow behind section */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(232,114,42,0.04)_0%,transparent_70%)] pointer-events-none" />
+
+                <motion.div
+                    initial={{ y: 40, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                    transition={{ duration: 0.7 }}
+                    className="text-center mb-20"
+                >
+                    <span className="inline-block px-4 py-1.5 rounded-full text-xs font-medium tracking-wide mb-6 bg-[rgba(232,114,42,0.08)] border border-[rgba(232,114,42,0.2)] text-[#e8a050]">
+                        Workflow
+                    </span>
+                    <h2 className="text-4xl sm:text-5xl font-semibold tracking-tight text-[#f1ebe4] mb-4">
+                        How It{' '}
+                        <span className="italic font-normal font-serif bg-gradient-to-br from-orange-500 to-amber-300 bg-clip-text text-transparent">
+                            Works
+                        </span>
+                    </h2>
+                    <p className="text-lg text-[#a89888] max-w-2xl mx-auto leading-relaxed">
+                        From claim submission to stakeholder insight — three seamless steps powered by intelligent agents.
+                    </p>
+                </motion.div>
+
+                <div className="relative max-w-5xl mx-auto">
+                    {/* Connecting line (desktop only) */}
+                    <div className="hidden md:block absolute top-[60px] left-[16.66%] right-[16.66%] h-[2px] bg-gradient-to-r from-[#e8722a]/40 via-[#e8722a]/20 to-[#e8722a]/40" />
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+                        {[
+                            {
+                                icon: <Upload size={24} className="text-orange-400" />,
+                                step: '01',
+                                title: 'Submit a Claim',
+                                desc: 'Policyholders submit claims through the platform. AI agents ingest, classify, and route them automatically.',
+                            },
+                            {
+                                icon: <Bot size={24} className="text-orange-400" />,
+                                step: '02',
+                                title: 'AI Agents Analyze',
+                                desc: 'Specialized agents — Claims, Underwriting, Fraud — work autonomously with complete traceability and observability.',
+                            },
+                            {
+                                icon: <Zap size={24} className="text-orange-400" />,
+                                step: '03',
+                                title: 'Instant Insights',
+                                desc: 'Stakeholders see real-time decisions, risk scores, and compliance status on the live observability dashboard.',
+                            },
+                        ].map((item, i) => (
+                            <motion.div
+                                key={item.step}
+                                initial={{ y: 50, opacity: 0 }}
+                                whileInView={{ y: 0, opacity: 1 }}
+                                viewport={{ once: true, amount: 0.3 }}
+                                transition={{ duration: 0.6, delay: i * 0.2 }}
+                                className="flex flex-col items-center text-center"
+                            >
+                                {/* Step circle */}
+                                <div className="relative w-[120px] h-[120px] rounded-full flex items-center justify-center mb-8 bg-[#13110e] border-2 border-[#e8722a]/20">
+                                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-[#e8722a] to-[#f2923c] flex items-center justify-center text-xs font-bold text-white shadow-lg shadow-[#e8722a]/30">
+                                        {item.step}
+                                    </div>
+                                    {item.icon}
+                                </div>
+                                <h3 className="text-lg font-semibold text-[#f1ebe4] mb-2">{item.title}</h3>
+                                <p className="text-sm leading-relaxed text-[#a89888] max-w-xs">{item.desc}</p>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ═══════════════════════════════════════════
+           FOOTER
+       ═══════════════════════════════════════════ */}
+            <footer className="relative z-20 py-14 px-8 lg:px-16 xl:px-24">
+                <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-2.5">
+                        <LogoIcon />
+                        <span className="text-base font-medium tracking-tight text-white">Savio</span>
+                    </div>
+                    <p className="text-sm text-[#5a4a3a]">
+                        © {new Date().getFullYear()} InsureOps AI. All rights reserved.
+                    </p>
+                    <Link
+                        to="/dashboard"
+                        className="flex items-center justify-center rounded-full text-sm font-medium text-white px-6 py-2.5 bg-gradient-to-br from-orange-500 to-orange-700 hover:shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all duration-300"
+                    >
+                        Get Started →
+                    </Link>
+                </div>
+            </footer>
+
+            {/* ═══════════════════════════════════════════
+           DECORATIVE STARS (Floating — hero only)
        ═══════════════════════════════════════════ */}
             <motion.div
                 className="absolute z-10 top-[20%] left-[5%]"
